@@ -54,3 +54,22 @@ A realistic, interactive room-planning and sales experience for curtains, fabric
 - Each window is measured and priced independently before any room-level total.
 - Show calculation assumptions and mark indicative estimates clearly.
 - Keep each module's code, data contract, tests, and completion status documented so work continues from the last verified state.
+
+
+## Mandatory accuracy and realism disclosure (release gate)
+These rules apply to product copy, UI labels, demos, and implementation:
+- Clearly label a photographic 360 tour as **movement between fixed captured viewpoints**. It is not unrestricted walking or free movement through a 3D room.
+- If unrestricted movement is later offered, identify it separately as a 3D experience and test it independently.
+- A fabric preview may be called realistic only when it uses prepared, element-specific masks/layers or equivalent scene assets that preserve folds, lighting, shadows, transparency, and occlusion. A flat color overlay or CSS illustration must be labeled a simplified preview.
+- Curtain motion in a photographic panorama must use prepared open/closed states or a validated compositing method; do not imply physically simulated motion if it is not present.
+- Measurements inferred from ordinary camera images are **estimates**, not verified engineering measurements. Show the source/method and known accuracy limits.
+- Any camera/LiDAR/depth-assisted measurement must require supported hardware, a calibration/reference procedure, and a human confirmation step before it is treated as a final site measurement.
+- Keep all displayed dimensions in centimeters (cm). If a measurement is estimated, label it as estimated; if confirmed by a person or suitable measuring device, identify that confirmation.
+- Never claim engineering accuracy, photorealism, 360 tour, VR support, or free-walk 3D until that exact capability has passed acceptance tests on the deployed experience.
+
+## Accuracy and realism acceptance tests
+- 360 tour: user can look around a real captured panorama and navigate only through explicitly linked viewpoints; UI explains that limitation.
+- Fabric preview: test at least one approved real room photo with a correctly masked curtain fabric asset; verify texture, folds, light/shadow and edges at desktop and mobile sizes.
+- Curtain states: verify open and closed views are both available and that any lighting effect is supported by the prepared assets.
+- Measurement: every field displays cm; estimated measurements are visibly marked; camera-derived measurements cannot be finalized without calibration and human confirmation.
+- Quote: every result shows its assumptions and remains an indicative estimate until verified by a site survey.
