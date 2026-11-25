@@ -4,7 +4,7 @@ import { calculateAreaSquareMeters, calculateFabricRequirement, centimetersToMet
 
 test('converts centimeters to meters only for calculations', () => {
   assert.equal(centimetersToMeters(250), 2.5)
-  assert.equal(calculateAreaSquareMeters(300, 270), 8.1)
+  assert.ok(Math.abs(calculateAreaSquareMeters(300, 270) - 8.1) < 1e-9)
 })
 
 test('rejects invalid or non-positive dimensions', () => {
