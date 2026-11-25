@@ -383,8 +383,8 @@ const verifiedProducts = {
   'hero': { sourceUrl: 'https://naguibselim.com/en/products/hero', imageUrl: 'https://naguibselim.com/cdn/shop/files/q_3_3a9222db-8255-4b75-9033-18b9a2cf37e2.png?v=1771639740&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
   'claro': { sourceUrl: 'https://naguibselim.com/en/products/claro', imageUrl: 'https://naguibselim.com/cdn/shop/files/1_b6ab1a8e-4ba2-416f-a485-d61db047b61c.jpg?v=1775380851&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
   'palm': { sourceUrl: 'https://naguibselim.com/en/products/palm', imageUrl: 'https://naguibselim.com/cdn/shop/files/g_1.png?v=1772962954&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
-  'euro': { sourceUrl: 'https://naguibselim.com/en/products/euro', imageUrl: 'https://naguibselim.com/cdn/shop/files/euroocopy.png?v=1772962954&width=3840', imageStatus: 'verified-official-image-2026-11-25' }
-  '31382': { sourceUrl: 'https://naguibselim.com/products/31382', imageUrl: null, priceEgp: 1484, priceStatus: 'observed-on-product-page-2026-11-25' }
+  'euro': { sourceUrl: 'https://naguibselim.com/en/products/euro', imageUrl: 'https://naguibselim.com/cdn/shop/files/euroocopy.png?v=1772962954&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
+  '31382': { sourceUrl: 'https://naguibselim.com/products/31382', imageUrl: null, priceEgp: 1484, priceStatus: 'observed-on-product-page-2026-11-25' },
   'jercy': { sourceUrl: 'https://naguibselim.com/products/jercy', imageUrl: 'https://naguibselim.com/cdn/shop/files/3_1_e9719722-b31c-4f39-91c4-14699dabd8a0.jpg?v=1773747211&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
   'madlen': { sourceUrl: 'https://naguibselim.com/products/madlen', imageUrl: 'https://naguibselim.com/cdn/shop/files/1_3b1e4e1d-3c18-4ee9-871a-f2174995917c.jpg?v=1775383617&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
   'ropanti': { sourceUrl: 'https://naguibselim.com/en/products/ropanti', imageUrl: 'https://naguibselim.com/cdn/shop/files/w_1.png?v=1770547709&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
