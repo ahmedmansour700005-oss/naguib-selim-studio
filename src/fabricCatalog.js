@@ -350,6 +350,12 @@ const verifiedProducts = {
   'echo': { sourceUrl: 'https://naguibselim.com/products/echo', imageUrl: 'https://naguibselim.com/cdn/shop/files/echocopy_f3815e4d-a28e-4055-ad3e-abcb67995e91.jpg?v=1773576195&width=1600', priceEgp: 1343, priceStatus: 'observed-sale-price-2026-11-25' },
   'crocodile': { sourceUrl: 'https://naguibselim.com/en/products/crocodile', imageUrl: null, priceEgp: 509.5, priceStatus: 'observed-range-upper-price-2026-11-25' },
   'excellent': { sourceUrl: 'https://naguibselim.com/products/excellent', imageUrl: null, priceEgp: 714, priceStatus: 'observed-sale-price-2026-11-25' },
+  '19771': { sourceUrl: 'https://naguibselim.com/products/19771', imageUrl: 'https://naguibselim.com/cdn/shop/files/19771.jpg?v=1774362367&width=1600', imageStatus: 'verified-official-image-2026-11-25' },
+  '19517': { sourceUrl: 'https://naguibselim.com/products/19517', imageUrl: 'https://naguibselim.com/cdn/shop/files/19517.jpg?v=1774362229&width=1600', imageStatus: 'verified-official-image-2026-11-25' },
+  '12109': { sourceUrl: 'https://naguibselim.com/products/12109', imageUrl: 'https://naguibselim.com/cdn/shop/files/12109.jpg?v=1774361683&width=1600', imageStatus: 'verified-official-image-2026-11-25' },
+  '12596': { sourceUrl: 'https://naguibselim.com/products/12596', imageUrl: 'https://naguibselim.com/cdn/shop/files/12596.jpg?v=1774362060&width=1600', imageStatus: 'verified-official-image-2026-11-25' },
+  'r1': { sourceUrl: 'https://naguibselim.com/en/products/r1', imageUrl: 'https://naguibselim.com/cdn/shop/files/1_cc5be29a-4656-4de2-8449-16970ea10d63.jpg?v=1775385001&width=1600', imageStatus: 'verified-official-image-2026-11-25' },
+  'ju ns': { sourceUrl: 'https://naguibselim.com/products/ju-ns', imageUrl: 'https://naguibselim.com/cdn/shop/files/ju.jpg?v=1774370099&width=1600', imageStatus: 'verified-official-image-2026-11-25' },
   '31382': { sourceUrl: 'https://naguibselim.com/products/31382', imageUrl: null, priceEgp: 1484, priceStatus: 'observed-on-product-page-2026-11-25' }
 }
 export const enrichedFabricCatalog = fabricCatalog.map(item => {
