@@ -340,3 +340,20 @@ export const fabricCatalog = [
   priceStatus: 'needs-verification',
   imageStatus: 'needs-source-image',
 }))
+
+const verifiedProducts = {
+  '31366': { sourceUrl: 'https://naguibselim.com/en/products/31366', imageUrl: 'https://naguibselim.com/cdn/shop/files/31366copy.jpg?v=1774363922&width=1600', priceEgp: 1243.5, priceStatus: 'observed-on-product-page-2026-11-25' },
+  '12273': { sourceUrl: 'https://naguibselim.com/products/12273', imageUrl: null, priceEgp: 885.5, priceStatus: 'observed-on-product-page-2026-11-25-sold-out' },
+  'teddy': { sourceUrl: 'https://naguibselim.com/products/teddy', imageUrl: 'https://naguibselim.com/cdn/shop/files/2_623059ac-a1f4-48cf-b572-78f16190f253.jpg?v=1775386542&width=1600', priceEgp: 574, priceStatus: 'observed-on-product-page-2026-11-25' },
+  'rabbit': { sourceUrl: 'https://naguibselim.com/products/rabbit', imageUrl: 'https://naguibselim.com/cdn/shop/files/q_2.png?v=1770546999&width=1600', priceEgp: 261, priceStatus: 'observed-sale-price-2026-11-25' },
+  'marvel': { sourceUrl: 'https://naguibselim.com/products/marvel', imageUrl: 'https://naguibselim.com/cdn/shop/files/2_350e29b0-5719-4153-aa24-982eae16482e.jpg?v=1773747347&width=1600', priceEgp: 610.5, priceStatus: 'observed-sale-price-2026-11-25' },
+  'echo': { sourceUrl: 'https://naguibselim.com/products/echo', imageUrl: 'https://naguibselim.com/cdn/shop/files/echocopy_f3815e4d-a28e-4055-ad3e-abcb67995e91.jpg?v=1773576195&width=1600', priceEgp: 1343, priceStatus: 'observed-sale-price-2026-11-25' },
+  'crocodile': { sourceUrl: 'https://naguibselim.com/en/products/crocodile', imageUrl: null, priceEgp: 509.5, priceStatus: 'observed-range-upper-price-2026-11-25' },
+  'excellent': { sourceUrl: 'https://naguibselim.com/products/excellent', imageUrl: null, priceEgp: 714, priceStatus: 'observed-sale-price-2026-11-25' },
+  '31382': { sourceUrl: 'https://naguibselim.com/products/31382', imageUrl: null, priceEgp: 1484, priceStatus: 'observed-on-product-page-2026-11-25' }
+}
+export const enrichedFabricCatalog = fabricCatalog.map(item => {
+  const key = item.name.toLocaleLowerCase()
+  const verified = verifiedProducts[key]
+  return verified ? { ...item, ...verified } : item
+})
