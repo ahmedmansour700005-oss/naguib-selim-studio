@@ -376,6 +376,18 @@ const verifiedProducts = {
   'spider': { sourceUrl: 'https://naguibselim.com/en/products/spider', imageUrl: 'https://naguibselim.com/cdn/shop/files/WhatsApp_Image_2026-02-07_at_6.16.30_PM.jpg?v=1770481188&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
   'vakoo': { sourceUrl: 'https://naguibselim.com/en/products/vakoo', imageUrl: 'https://naguibselim.com/cdn/shop/files/WhatsApp_Image_2026-02-07_at_6.38.41_PM.jpg?v=1770482367&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
   'kenzo': { sourceUrl: 'https://naguibselim.com/en/products/kenzo', imageUrl: 'https://naguibselim.com/cdn/shop/files/WhatsApp_Image_2026-02-07_at_6.51.14_PM.jpg?v=1771645580&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
+  'raflis': { sourceUrl: 'https://naguibselim.com/products/raflis', imageUrl: 'https://naguibselim.com/cdn/shop/files/s_2.png?v=1770546214&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
+  'suede': { sourceUrl: 'https://naguibselim.com/en/products/suede', imageUrl: 'https://naguibselim.com/cdn/shop/files/2_cc0ddeb2-7f40-4a6e-8429-ec201e383ac9.jpg?v=1775391533&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
+  'terra': { sourceUrl: 'https://naguibselim.com/en/products/terra', imageUrl: 'https://naguibselim.com/cdn/shop/files/3_1_1619de4e-d010-46d8-a9c6-5821e446645c.jpg?v=1773747760&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
+  'polo': { sourceUrl: 'https://naguibselim.com/en/products/polo', imageUrl: 'https://naguibselim.com/cdn/shop/files/2_22.png?v=1772963685&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
+  'sandi': { sourceUrl: 'https://naguibselim.com/en/products/sandi', imageUrl: 'https://naguibselim.com/cdn/shop/files/3_b01b5af8-d171-444f-8226-1c0b353d4c31.jpg?v=1775385570&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
+  'hummer': { sourceUrl: 'https://naguibselim.com/en/products/hummer', imageUrl: 'https://naguibselim.com/cdn/shop/files/1_ab02245a-0ace-484c-b568-78cf2a761108.jpg?v=1775381988&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
+  'lines': { sourceUrl: 'https://naguibselim.com/en/products/lines', imageUrl: 'https://naguibselim.com/cdn/shop/files/1_7615a961-212e-4342-9945-2a97e4951d16.jpg?v=1775382368&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
+  'curly': { sourceUrl: 'https://naguibselim.com/en/products/curly', imageUrl: 'https://naguibselim.com/cdn/shop/files/3_1c468452-cbcf-4d75-be9b-146baeb9c276.jpg?v=1775381147&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
+  'hero': { sourceUrl: 'https://naguibselim.com/en/products/hero', imageUrl: 'https://naguibselim.com/cdn/shop/files/q_3_3a9222db-8255-4b75-9033-18b9a2cf37e2.png?v=1771639740&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
+  'claro': { sourceUrl: 'https://naguibselim.com/en/products/claro', imageUrl: 'https://naguibselim.com/cdn/shop/files/1_b6ab1a8e-4ba2-416f-a485-d61db047b61c.jpg?v=1775380851&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
+  'palm': { sourceUrl: 'https://naguibselim.com/en/products/palm', imageUrl: 'https://naguibselim.com/cdn/shop/files/g_1.png?v=1772962954&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
+  'euro': { sourceUrl: 'https://naguibselim.com/en/products/euro', imageUrl: 'https://naguibselim.com/cdn/shop/files/euroocopy.png?v=1772962954&width=3840', imageStatus: 'verified-official-image-2026-11-25' }
   '31382': { sourceUrl: 'https://naguibselim.com/products/31382', imageUrl: null, priceEgp: 1484, priceStatus: 'observed-on-product-page-2026-11-25' }
 }
 export const enrichedFabricCatalog = fabricCatalog.map(item => {
