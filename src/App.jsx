@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { calculateFabricRequirement, calculateAreaSquareMeters } from './measurement.js'
+import { calculateFabricRequirement } from './measurement.js'
 import { ArrowDown, ArrowLeft, Check, ChevronDown, Eye, Menu, Ruler, Sparkles, X } from 'lucide-react'
 
 const fabrics = [
