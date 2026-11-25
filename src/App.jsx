@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react'
+import { calculateAreaSquareMeters } from './measurement.js'
 import { ArrowDown, ArrowLeft, Check, ChevronDown, Eye, Menu, Ruler, Sparkles, X } from 'lucide-react'
 
 const fabrics = [
@@ -59,9 +60,8 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false)
   const fabric = fabrics.find(f => f.id === fabricId)
   const estimate = useMemo(() => {
-    const w = Math.max(0, Number(width) || 0) / 100
-    const h = Math.max(0, Number(height) || 0) / 100
-    return Math.round(w * h * fabric.price * 1.8)
+    const areaM2 = calculateAreaSquareMeters(width, height)
+    return Math.round(areaM2 * fabric.price * 1.8)
   }, [width, height, fabric])
   const saveDesign = () => {
     const design = { fabric: fabric.name, style: styles.find(s => s.id === style).name, width, height, estimate, savedAt: new Date().toISOString() }
@@ -115,8 +115,9 @@ export default function App() {
             </div>
             <div className="control-block dimensions">
               <div className="control-title"><span className="step">03</span><div><h3>أدخل المقاسات</h3><small>YOUR DIMENSIONS · CM</small></div></div>
-              <div className="dimension-fields"><label>عرض الشباك<input type="number" min="1" value={width} onChange={e => setWidth(e.target.value)} /></label><label>ارتفاع الشباك<input type="number" min="1" value={height} onChange={e => setHeight(e.target.value)} /></label></div>
+              <div className="dimension-fields"><label>عرض الشباك (سم)<input type="number" min="1" max="2000" step="0.1" inputMode="decimal" value={width} onChange={e => setWidth(e.target.value)} /></label><label>ارتفاع الشباك (سم)<input type="number" min="1" max="2000" step="0.1" inputMode="decimal" value={height} onChange={e => setHeight(e.target.value)} /></label></div>
               <div className="estimate"><span><Ruler size={16}/> تقدير مبدئي للخامة</span><b>{estimate.toLocaleString('en-US')} <small>ج.م</small></b></div>
+              <p className="estimate-note">المقاسات المدخلة بالسم: {width || 0} × {height || 0} سم · المساحة المحوّلة للحساب: {calculateAreaSquareMeters(width, height).toFixed(2)} م².</p>
               <p className="estimate-note">تقدير استرشادي للتجربة فقط، والسعر النهائي يتحدد بعد معاينة التفاصيل والمقاسات.</p>
             </div>
             <button className="save-btn" onClick={saveDesign}>{saved ? <><Check size={17}/> تم حفظ التصميم على جهازك</> : <>احفظ اختياراتي <ArrowLeft size={17}/></>}</button>
