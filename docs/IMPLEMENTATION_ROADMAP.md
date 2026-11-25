@@ -78,3 +78,14 @@ Customer-facing dimensions must remain in **centimeters (سم)** in every phase.
 
 ## Current honest baseline
 The deployed UI is an early React/CSS prototype. It has a stylized illustrative room, a small fabric/style sample, basic open/close interaction, a single width/height form in cm, an indicative estimate, local save, and a WhatsApp message draft. It does **not** yet provide real 360 photography, VR tour, photorealistic material replacement, full multi-window measurement, upholstery compositing, AI voice consultant, or animated sales guide.
+
+
+## Mandatory technical truth and measurement accuracy gate
+- [ ] Label the 360 panorama tour as fixed-viewpoint navigation; do not call it free walking.
+- [ ] If a separate free-walk 3D mode is built, test and label it as a distinct feature.
+- [ ] Do not call fabric replacement photorealistic until a real room image, element-specific masks/layers, and real fabric assets preserve folds, lighting, shadows, transparency, and occlusion.
+- [ ] Implement curtain open/closed states using prepared assets or a validated compositing pipeline.
+- [ ] Label all camera/image-derived dimensions as estimates and disclose the measurement method and accuracy limits.
+- [ ] For camera/LiDAR/depth measurement, document supported devices, calibration/reference procedure, and human confirmation before finalizing.
+- [ ] Keep all user-facing measurement values and field labels in cm.
+- [ ] Add automated/manual acceptance checks for panorama navigation, fabric compositing, curtain states, and measurement accuracy disclosures before release.
