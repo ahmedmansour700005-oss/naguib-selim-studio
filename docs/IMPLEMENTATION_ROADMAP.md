@@ -20,14 +20,14 @@ Customer-facing dimensions must remain in **centimeters (سم)** in every phase.
 
 ## Phase 1 — Measurement and quotation foundation
 - [~] Basic single-window width/height inputs (cm).
-- [ ] Multiple windows and balconies, each with its own saved measurements.
-- [ ] Curtain-box/pelmet presence and dimensions (cm).
-- [ ] Installation type, mounting position, clearances and allowances (cm).
-- [ ] Slopes, irregular openings and notes/photos per opening.
-- [ ] Fabric fullness, layers (sheer/blackout), heading style and waste assumptions.
-- [ ] Transparent fabric-quantity calculation with editable assumptions.
-- [ ] Per-window estimate and room total; label estimates as indicative until surveyed.
-- [ ] Validation, keyboard/mobile usability and measurement tests.
+- [x] Multiple windows and balconies, each with its own saved measurements (local prototype).
+- [~] Curtain-box/pelmet presence and depth (cm) captured; not yet used in quantity calculation.
+- [~] Top/bottom allowances and slope difference (cm) captured; installation type and full clearance model remain.
+- [~] Slope difference and notes captured per opening; irregular geometry/photos remain.
+- [~] Fullness, one/two layers and 10% waste assumption implemented; heading-specific rules remain.
+- [~] Transparent initial area estimator implemented; fabric-roll width/panel cutting and editable studio rules remain.
+- [x] Per-opening estimate and room total shown; estimates explicitly labeled indicative.
+- [~] Positive-dimension validation and Node calculation tests added; full accessibility/device QA remains.
 
 ## Phase 2 — Real 360 room experience
 - [ ] Obtain or capture licensed, real 360 room panoramas.
@@ -70,7 +70,7 @@ Customer-facing dimensions must remain in **centimeters (سم)** in every phase.
 ## Phase 7 — Quality, release and operations
 - [x] Automated production build workflow added.
 - [ ] Green CI build verified.
-- [ ] Unit and interaction tests for measurement and pricing.
+- [~] Unit tests for conversion, invalid dimensions, allowances, fullness and layers added; UI interaction tests remain.
 - [ ] Accessibility and responsive checks.
 - [ ] Performance tests on ordinary mobile devices.
 - [ ] Verify Cloudflare production deployment and deployed URL after release.
@@ -89,3 +89,12 @@ The deployed UI is an early React/CSS prototype. It has a stylized illustrative 
 - [ ] For camera/LiDAR/depth measurement, document supported devices, calibration/reference procedure, and human confirmation before finalizing.
 - [ ] Keep all user-facing measurement values and field labels in cm.
 - [ ] Add automated/manual acceptance checks for panorama navigation, fabric compositing, curtain states, and measurement accuracy disclosures before release.
+
+
+## Verified implementation update — 2026-11-25
+- [x] Multi-opening measurement form committed to `src/App.jsx`.
+- [x] Centimeter-first calculation engine committed to `src/measurement.js`.
+- [x] Node test cases committed to `src/measurement.test.js`.
+- [x] CI workflow now runs `npm test` before `npm run build`.
+- [~] Changes are committed on `main`; GitHub Actions result still needs live confirmation.
+- [ ] Production deployment and browser interaction checks still need confirmation.
