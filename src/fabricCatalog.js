@@ -356,10 +356,6 @@ const verifiedProducts = {
   '12596': { sourceUrl: 'https://naguibselim.com/products/12596', imageUrl: 'https://naguibselim.com/cdn/shop/files/12596.jpg?v=1774362060&width=1600', imageStatus: 'verified-official-image-2026-11-25' },
   'r1': { sourceUrl: 'https://naguibselim.com/en/products/r1', imageUrl: 'https://naguibselim.com/cdn/shop/files/1_cc5be29a-4656-4de2-8449-16970ea10d63.jpg?v=1775385001&width=1600', imageStatus: 'verified-official-image-2026-11-25' },
   'ju ns': { sourceUrl: 'https://naguibselim.com/products/ju-ns', imageUrl: 'https://naguibselim.com/cdn/shop/files/ju.jpg?v=1774370099&width=1600', imageStatus: 'verified-official-image-2026-11-25' },
-  '19517': { sourceUrl: 'https://naguibselim.com/products/19517', imageUrl: 'https://naguibselim.com/cdn/shop/files/19517.jpg?v=1774362229&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
-  '12109': { sourceUrl: 'https://naguibselim.com/products/12109', imageUrl: 'https://naguibselim.com/cdn/shop/files/12109.jpg?v=1774361683&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
-  '12596': { sourceUrl: 'https://naguibselim.com/products/12596', imageUrl: 'https://naguibselim.com/cdn/shop/files/12596.jpg?v=1774362060&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
-  'ju ns': { sourceUrl: 'https://naguibselim.com/products/ju-ns', imageUrl: 'https://naguibselim.com/cdn/shop/files/ju.jpg?v=1774370099&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
   'moon': { sourceUrl: 'https://naguibselim.com/en/products/moon', imageUrl: 'https://naguibselim.com/cdn/shop/files/WhatsApp_Image_2026-02-05_at_12.35.56_AM.jpg?v=1770256300&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
   'german': { sourceUrl: 'https://naguibselim.com/en/products/german', imageUrl: 'https://naguibselim.com/cdn/shop/files/a_5.png?v=1772360122&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
   'r7': { sourceUrl: 'https://naguibselim.com/en/products/r7', imageUrl: 'https://naguibselim.com/cdn/shop/files/WhatsApp_Image_2026-02-07_at_6.04.16_PM.jpg?v=1770480335&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
@@ -389,6 +385,12 @@ const verifiedProducts = {
   'palm': { sourceUrl: 'https://naguibselim.com/en/products/palm', imageUrl: 'https://naguibselim.com/cdn/shop/files/g_1.png?v=1772962954&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
   'euro': { sourceUrl: 'https://naguibselim.com/en/products/euro', imageUrl: 'https://naguibselim.com/cdn/shop/files/euroocopy.png?v=1772962954&width=3840', imageStatus: 'verified-official-image-2026-11-25' }
   '31382': { sourceUrl: 'https://naguibselim.com/products/31382', imageUrl: null, priceEgp: 1484, priceStatus: 'observed-on-product-page-2026-11-25' }
+  'jercy': { sourceUrl: 'https://naguibselim.com/products/jercy', imageUrl: 'https://naguibselim.com/cdn/shop/files/3_1_e9719722-b31c-4f39-91c4-14699dabd8a0.jpg?v=1773747211&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
+  'madlen': { sourceUrl: 'https://naguibselim.com/products/madlen', imageUrl: 'https://naguibselim.com/cdn/shop/files/1_3b1e4e1d-3c18-4ee9-871a-f2174995917c.jpg?v=1775383617&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
+  'ropanti': { sourceUrl: 'https://naguibselim.com/en/products/ropanti', imageUrl: 'https://naguibselim.com/cdn/shop/files/w_1.png?v=1770547709&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
+  'digo': { sourceUrl: 'https://naguibselim.com/en/products/digo', imageUrl: 'https://naguibselim.com/cdn/shop/files/q_2_63b4c3f4-847b-4960-b22a-d401b7a3c9a1.png?v=1771639388&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
+  'lacost': { sourceUrl: 'https://naguibselim.com/products/lacost', imageUrl: 'https://naguibselim.com/cdn/shop/files/2_8.png?v=1773561666&width=3840', imageStatus: 'verified-official-image-2026-11-25' },
+  'corduroy': { sourceUrl: 'https://naguibselim.com/en/products/corduroy-a', imageUrl: 'https://naguibselim.com/cdn/shop/files/a1.png?v=1772962873&width=3840', imageStatus: 'verified-official-image-2026-11-25', note: 'The official catalogue separates Corduroy A and B.' },
 }
 export const enrichedFabricCatalog = fabricCatalog.map(item => {
   const key = item.name.toLocaleLowerCase()
