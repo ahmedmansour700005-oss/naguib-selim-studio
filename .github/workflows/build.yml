@@ -28,5 +28,7 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm install
+      - name: Run measurement tests
+        run: npm test
       - name: Build production site
         run: npm run build
