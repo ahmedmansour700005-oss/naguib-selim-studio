@@ -127,12 +127,12 @@ export default function App() {
                 <label htmlFor="fabric-catalog-search">كتالوج خامات المعرض — ابحث بالاسم أو الكود</label>
                 <input id="fabric-catalog-search" type="search" value={catalogQuery} onChange={e => setCatalogQuery(e.target.value)} placeholder="مثال: moon أو 31366 أو rabbit" />
                 <div className="catalog-results">
-                  {filteredCatalog.map(item => <button type="button" key={item.id} className={selectedCatalogId === item.id ? 'catalog-item selected' : 'catalog-item'} onClick={() => setSelectedCatalogId(item.id)}>{item.name}</button>)}
+                  {filteredCatalog.map(item => <button type="button" key={item.id} className={selectedCatalogId === item.id ? 'catalog-item selected' : 'catalog-item'} onClick={() => setSelectedCatalogId(item.id)}>{item.imageUrl && <img src={item.imageUrl} alt="" loading="lazy" />}<span>{item.name}</span></button>)}
                 </div>
                 <small>تمت إضافة {fabricCatalog.length} اسم/كود من قائمتك بعد إزالة التكرارات. السعر والصورة لا يظهران كبيانات مؤكدة إلا بعد التحقق من صفحة المنتج.</small>
-                {selectedCatalog && <div className="catalog-selected"><b>الخامة المختارة: {selectedCatalog.name}</b><a href={selectedCatalog.sourceUrl} target="_blank" rel="noreferrer">افتح بحث الموقع الرسمي</a>{selectedCatalog.imageUrl && <img src={selectedCatalog.imageUrl} alt={selectedCatalog.name} />}</div>}
+                {selectedCatalog && <div className="catalog-selected"><b>الخامة المختارة: {selectedCatalog.name}</b><a href={selectedCatalog.sourceUrl} target="_blank" rel="noreferrer">صفحة المنتج الرسمية</a>{selectedCatalog.imageUrl && <img src={selectedCatalog.imageUrl} alt={selectedCatalog.name} />}<small>الصورة مرجع للخامة. تطبيق نسيجها الواقعي على الستارة داخل المعاينة يحتاج خريطة خامة وقناع مخصصين، ولم يتم تفعيله بعد.</small></div>}
               </div>
-              <div className="fabric-detail"><span className="detail-dot" style={{background:fabric.color}}/><span>{selectedCatalog ? selectedCatalog.name : fabric.en}</span><b>{selectedCatalog?.priceEgp ? `${selectedCatalog.priceEgp.toLocaleString('en-US')} ج.م` : `${fabric.price.toLocaleString('en-US')} ج.م / م² · سعر تجريبي`}</b></div>
+              <div className="fabric-detail"><span className="detail-dot" style={{background:fabric.color}}/><span>{selectedCatalog ? selectedCatalog.name : fabric.en}</span><b>{selectedCatalog ? (selectedCatalog.priceEgp ? `${selectedCatalog.priceEgp.toLocaleString('en-US')} ج.م · سعر مرصود يحتاج تأكيد وحدة البيع` : 'السعر ووحدة البيع: يلزم تأكيد من المعرض') : `${fabric.price.toLocaleString('en-US')} ج.م / م² · سعر تجريبي`}</b></div>
             </div>
             <div className="control-block">
               <div className="control-title"><span className="step">02</span><div><h3>اختار شكل الستارة</h3><small>CURTAIN STYLE</small></div></div>
