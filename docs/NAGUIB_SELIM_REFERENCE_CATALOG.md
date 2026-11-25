@@ -12,30 +12,30 @@ Source collection: https://naguibselim.com/collections/light-curtain
 
 | Product | Listing price (EGP) | Product page |
 |---|---:|---|
-| قماش ستائر كتان 31366 | 1,368.00 | https://naguibselim.com/ |
-| قماش ستائر كتان 12273 | 885.50 | https://naguibselim.com/ |
-| قماش ستائر كتان 12109 | 1,341.50 | https://naguibselim.com/ |
-| قماش ستائر كتان VJX11382 | 1,435.50 | https://naguibselim.com/ |
-| قماش ستائر كتان VJX11620 | 1,431.00 | https://naguibselim.com/ |
-| قماش ستائر MAYA-ADK | 1,180.00 | https://naguibselim.com/ |
-| قماش ستائر كتان 12596 | 1,160.00 | https://naguibselim.com/ |
+| قماش ستائر كتان 31366 | 1,368.00 | https://naguibselim.com/collections/light-curtain |
+| قماش ستائر كتان 12273 | 885.50 | https://naguibselim.com/collections/light-curtain |
+| قماش ستائر كتان 12109 | 1,341.50 | https://naguibselim.com/collections/light-curtain |
+| قماش ستائر كتان VJX11382 | 1,435.50 | https://naguibselim.com/collections/light-curtain |
+| قماش ستائر كتان VJX11620 | 1,431.00 | https://naguibselim.com/collections/light-curtain |
+| قماش ستائر MAYA-ADK | 1,180.00 | https://naguibselim.com/collections/light-curtain |
+| قماش ستائر كتان 12596 | 1,160.00 | https://naguibselim.com/collections/light-curtain |
 | قماش ستائر كتان k2.ns.2 | 1,249.00 | https://naguibselim.com/products/k2-ns-2 |
-| قماش ستائر كتان ju.ns | 729.00 | https://naguibselim.com/ |
-| قماش ستائر TINA | 796.50 | https://naguibselim.com/ |
-| قماش ستائر Sab 0441 | 616.00 | https://naguibselim.com/ |
-| قماش ستائر PRIMITIVO | 825.00 | https://naguibselim.com/ |
+| قماش ستائر كتان ju.ns | 729.00 | https://naguibselim.com/collections/light-curtain |
+| قماش ستائر TINA | 796.50 | https://naguibselim.com/collections/light-curtain |
+| قماش ستائر Sab 0441 | 616.00 | https://naguibselim.com/collections/light-curtain |
+| قماش ستائر PRIMITIVO | 825.00 | https://naguibselim.com/collections/light-curtain |
 | ستائر كتان خفيفة EXCELLENT | 924.00 | https://naguibselim.com/products/excellent |
 | ستائر كتان خفيفة ECHO | 1,738.00 | https://naguibselim.com/products/echo |
-| ستائر كتان خفيفة CHIC | 693.00 | https://naguibselim.com/ |
-| قماش ستائر CHERRY | 1,553.50 | https://naguibselim.com/ |
-| قماش ستائر CAROLINA | 803.00 | https://naguibselim.com/ |
-| قماش ستائر كتان ALMOND | 1,331.00 | https://naguibselim.com/ |
-| قماش ستائر كتان ALMA | 1,017.50 | https://naguibselim.com/ |
-| قماش ستائر تول ACERO | 759.00 | https://naguibselim.com/ |
-| قماش ستائر كتان 57ns | 702.50 | https://naguibselim.com/ |
-| 31408 Linen Light Curtain | 1,129.50 | https://naguibselim.com/ |
-| قماش ستائر كتان 31382 | 1,484.00 | https://naguibselim.com/ |
-| 31162 Linen Light Curtain | 1,122.00 | https://naguibselim.com/ |
+| ستائر كتان خفيفة CHIC | 693.00 | https://naguibselim.com/collections/light-curtain |
+| قماش ستائر CHERRY | 1,553.50 | https://naguibselim.com/collections/light-curtain |
+| قماش ستائر CAROLINA | 803.00 | https://naguibselim.com/collections/light-curtain |
+| قماش ستائر كتان ALMOND | 1,331.00 | https://naguibselim.com/collections/light-curtain |
+| قماش ستائر كتان ALMA | 1,017.50 | https://naguibselim.com/collections/light-curtain |
+| قماش ستائر تول ACERO | 759.00 | https://naguibselim.com/collections/light-curtain |
+| قماش ستائر كتان 57ns | 702.50 | https://naguibselim.com/collections/light-curtain |
+| 31408 Linen Light Curtain | 1,129.50 | https://naguibselim.com/collections/light-curtain |
+| قماش ستائر كتان 31382 | 1,484.00 | https://naguibselim.com/collections/light-curtain |
+| 31162 Linen Light Curtain | 1,122.00 | https://naguibselim.com/collections/light-curtain |
 
 Note: some items were marked out of stock in the collection listing. Check live stock and exact variant price.
 
@@ -44,10 +44,10 @@ Source collection: https://naguibselim.com/collections/heavy-curtain
 
 | Product | Listing price (EGP) | Product page |
 |---|---:|---|
-| قماش ستائر كتان Jercy | 632.00 (was 813.00) | https://naguibselim.com/ |
+| قماش ستائر كتان Jercy | 632.00 (was 813.00) | https://naguibselim.com/collections/heavy-curtain |
 | قماش ستائر قطيفة GUCCI | 573.00 (was 1,163.00) | https://naguibselim.com/products/gucci-upholstery-linen-fabric-copy |
 | قماش ستائر كتان DM | 382.50 (was 722.00) | https://naguibselim.com/products/dm-copy |
-| قماش ستائر Stars | 589.50 | https://naguibselim.com/ |
+| قماش ستائر Stars | 589.50 | https://naguibselim.com/collections/heavy-curtain |
 | قماش ستائر Naturalo | 654.50 (was 691.00) | https://naguibselim.com/products/naturalo |
 
 Additional curtain product pages found:
