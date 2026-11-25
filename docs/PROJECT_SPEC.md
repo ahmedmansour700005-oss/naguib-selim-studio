@@ -73,3 +73,13 @@ These rules apply to product copy, UI labels, demos, and implementation:
 - Curtain states: verify open and closed views are both available and that any lighting effect is supported by the prepared assets.
 - Measurement: every field displays cm; estimated measurements are visibly marked; camera-derived measurements cannot be finalized without calibration and human confirmation.
 - Quote: every result shows its assumptions and remains an indicative estimate until verified by a site survey.
+
+
+## Implemented measurement prototype (2026-11-25)
+- The configurator now supports multiple separately named windows/balconies in one design.
+- Each opening captures width and height, top/bottom allowances, slope difference, fullness, one/two fabric layers, curtain-box presence/depth, and survey notes.
+- Every customer-facing dimension input is labeled in cm. Area and material calculations convert internally to m².
+- The estimator exposes its assumptions: fullness, layer count, 10% waste factor, and an indicative pricing multiplier. Prices remain illustrative and must be replaced with studio-approved rate rules.
+- Measurements and opening details are stored locally with the saved design and included in the WhatsApp draft.
+- Automated Node tests cover cm conversion, invalid dimensions, allowances/fullness, and layered fabric quantities.
+- This is a first measurement/estimate prototype, not a final engineering survey or production quotation. Curtain-box depth is captured as a survey field but is not currently included in the fabric quantity formula.
