@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { calculateFabricRequirement } from './measurement.js'
-import { fabricCatalog } from './fabricCatalog.js'
+import { enrichedFabricCatalog as fabricCatalog } from './fabricCatalog.js'
 import { ArrowDown, ArrowLeft, Check, ChevronDown, Eye, Menu, Ruler, Sparkles, X } from 'lucide-react'
 
 const fabrics = [
@@ -77,7 +77,7 @@ export default function App() {
   const [saved, setSaved] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const fabric = fabrics.find(f => f.id === fabricId)
-  const openingEstimates = useMemo(() => openings.map(item => ({ ...item, ...calculateFabricRequirement(item, selectedCatalog?.priceEgp ?? fabric.price) })), [openings, fabric, selectedCatalog])
+  const openingEstimates = useMemo(() => openings.map(item => ({ ...item, ...calculateFabricRequirement(item, fabric.price) })), [openings, fabric, selectedCatalog])
   const estimate = openingEstimates.reduce((sum, item) => sum + item.estimateEgp, 0)
   const saveDesign = () => {
     const design = { fabric: fabric.name, catalogFabric: selectedCatalog?.name || null, catalogSource: selectedCatalog?.sourceUrl || null, style: styles.find(s => s.id === style).name, openings, openingEstimates, estimate, savedAt: new Date().toISOString() }
@@ -169,7 +169,7 @@ export default function App() {
               <div className="estimate-note">
                 {openingEstimates.map(item => <p key={item.id}>{item.name}: {item.valid ? `${item.fabricAreaM2.toFixed(2)} م² خامة تقريبًا · ${item.estimateEgp.toLocaleString('en-US')} ج.م` : 'أدخل عرضًا وارتفاعًا صحيحين بالسم لإظهار التقدير.'}</p>)}
               </div>
-              {selectedCatalog && !selectedCatalog.priceEgp && <p className="estimate-note">تنبيه: سعر «{selectedCatalog.name}» لم يتم التحقق منه بعد؛ الرقم الظاهر في التقدير ما زال مبنياً على سعر تجريبي وليس سعر هذه الخامة.</p>}
+              {selectedCatalog && <p className="estimate-note">تنبيه: سعر صفحة المنتج المعروض مرجعي فقط وقد يكون مرتبطاً بمتغير أو وحدة بيع مختلفة. تقدير التكلفة الحالي ما زال تجريبياً ولا يستخدم سعر هذه الخامة كمقايسة.</p>}
               <p className="estimate-note">الحساب استرشادي ويعتمد على معامل الثنيات والزيادات وعدد الطبقات وهالك تقديري. لا يُعد مقايسة نهائية قبل المعاينة وقياس الموقع.</p>
               <p className="estimate-note">أي قياس مستخرج من صورة أو كاميرا يظل تقديريًا حتى المعايرة والتأكيد البشري. جميع المدخلات بالسنتيمتر.</p>
             </div>
