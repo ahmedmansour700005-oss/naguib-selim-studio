@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { calculateFabricRequirement } from './measurement.js'
+import { fabricCatalog } from './fabricCatalog.js'
 import { ArrowDown, ArrowLeft, Check, ChevronDown, Eye, Menu, Ruler, Sparkles, X } from 'lucide-react'
 
 const fabrics = [
@@ -50,6 +51,10 @@ function RoomPreview({ fabric, open, style, setOpen }) {
 
 export default function App() {
   const [fabricId, setFabricId] = useState('linen')
+  const [catalogQuery, setCatalogQuery] = useState('')
+  const [selectedCatalogId, setSelectedCatalogId] = useState('')
+  const selectedCatalog = fabricCatalog.find(item => item.id === selectedCatalogId)
+  const filteredCatalog = fabricCatalog.filter(item => item.name.toLocaleLowerCase().includes(catalogQuery.trim().toLocaleLowerCase())).slice(0, 80)
   const [style, setStyle] = useState('wave')
   const [open, setOpen] = useState(false)
   const [openings, setOpenings] = useState([{ id: 1, name: 'شباك غرفة المعيشة', type: 'window', widthCm: '300', heightCm: '270', hasPelmet: false, pelmetDepthCm: '15', slopeCm: '0', topAllowanceCm: '20', bottomAllowanceCm: '20', fullness: '2', layers: '1', notes: '' }])
@@ -72,10 +77,10 @@ export default function App() {
   const [saved, setSaved] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const fabric = fabrics.find(f => f.id === fabricId)
-  const openingEstimates = useMemo(() => openings.map(item => ({ ...item, ...calculateFabricRequirement(item, fabric.price) })), [openings, fabric])
+  const openingEstimates = useMemo(() => openings.map(item => ({ ...item, ...calculateFabricRequirement(item, selectedCatalog?.priceEgp ?? fabric.price) })), [openings, fabric, selectedCatalog])
   const estimate = openingEstimates.reduce((sum, item) => sum + item.estimateEgp, 0)
   const saveDesign = () => {
-    const design = { fabric: fabric.name, style: styles.find(s => s.id === style).name, openings, openingEstimates, estimate, savedAt: new Date().toISOString() }
+    const design = { fabric: fabric.name, catalogFabric: selectedCatalog?.name || null, catalogSource: selectedCatalog?.sourceUrl || null, style: styles.find(s => s.id === style).name, openings, openingEstimates, estimate, savedAt: new Date().toISOString() }
     localStorage.setItem('nss-design', JSON.stringify(design))
     setSaved(true)
     setTimeout(() => setSaved(false), 3500)
@@ -117,8 +122,17 @@ export default function App() {
           <div className="controls">
             <div className="control-block">
               <div className="control-title"><span className="step">01</span><div><h3>اختر الخامة</h3><small>FABRIC COLLECTION</small></div></div>
-              <div className="fabric-grid">{fabrics.map(f => <button key={f.id} className={`fabric-option ${fabricId === f.id ? 'selected' : ''}`} onClick={() => setFabricId(f.id)}><span className={`swatch ${f.texture}`} style={{'--swatch': f.color}}>{fabricId === f.id && <Check size={15}/>}</span><span>{f.name}</span></button>)}</div>
-              <div className="fabric-detail"><span className="detail-dot" style={{background:fabric.color}}/><span>{fabric.en}</span><b>{fabric.price.toLocaleString('en-US')} ج.م / م²</b></div>
+              <div className="fabric-grid">{fabrics.map(f => <button key={f.id} className={`fabric-option ${fabricId === f.id ? 'selected' : ''}`} onClick={() => {setFabricId(f.id);setSelectedCatalogId('')}}><span className={`swatch ${f.texture}`} style={{'--swatch': f.color}}>{fabricId === f.id && !selectedCatalog && <Check size={15}/>}</span><span>{f.name}</span></button>)}</div>
+              <div className="catalog-picker">
+                <label htmlFor="fabric-catalog-search">كتالوج خامات المعرض — ابحث بالاسم أو الكود</label>
+                <input id="fabric-catalog-search" type="search" value={catalogQuery} onChange={e => setCatalogQuery(e.target.value)} placeholder="مثال: moon أو 31366 أو rabbit" />
+                <div className="catalog-results">
+                  {filteredCatalog.map(item => <button type="button" key={item.id} className={selectedCatalogId === item.id ? 'catalog-item selected' : 'catalog-item'} onClick={() => setSelectedCatalogId(item.id)}>{item.name}</button>)}
+                </div>
+                <small>تمت إضافة {fabricCatalog.length} اسم/كود من قائمتك بعد إزالة التكرارات. السعر والصورة لا يظهران كبيانات مؤكدة إلا بعد التحقق من صفحة المنتج.</small>
+                {selectedCatalog && <div className="catalog-selected"><b>الخامة المختارة: {selectedCatalog.name}</b><a href={selectedCatalog.sourceUrl} target="_blank" rel="noreferrer">افتح بحث الموقع الرسمي</a>{selectedCatalog.imageUrl && <img src={selectedCatalog.imageUrl} alt={selectedCatalog.name} />}</div>}
+              </div>
+              <div className="fabric-detail"><span className="detail-dot" style={{background:fabric.color}}/><span>{selectedCatalog ? selectedCatalog.name : fabric.en}</span><b>{selectedCatalog?.priceEgp ? `${selectedCatalog.priceEgp.toLocaleString('en-US')} ج.م` : `${fabric.price.toLocaleString('en-US')} ج.م / م² · سعر تجريبي`}</b></div>
             </div>
             <div className="control-block">
               <div className="control-title"><span className="step">02</span><div><h3>اختار شكل الستارة</h3><small>CURTAIN STYLE</small></div></div>
@@ -155,6 +169,7 @@ export default function App() {
               <div className="estimate-note">
                 {openingEstimates.map(item => <p key={item.id}>{item.name}: {item.valid ? `${item.fabricAreaM2.toFixed(2)} م² خامة تقريبًا · ${item.estimateEgp.toLocaleString('en-US')} ج.م` : 'أدخل عرضًا وارتفاعًا صحيحين بالسم لإظهار التقدير.'}</p>)}
               </div>
+              {selectedCatalog && !selectedCatalog.priceEgp && <p className="estimate-note">تنبيه: سعر «{selectedCatalog.name}» لم يتم التحقق منه بعد؛ الرقم الظاهر في التقدير ما زال مبنياً على سعر تجريبي وليس سعر هذه الخامة.</p>}
               <p className="estimate-note">الحساب استرشادي ويعتمد على معامل الثنيات والزيادات وعدد الطبقات وهالك تقديري. لا يُعد مقايسة نهائية قبل المعاينة وقياس الموقع.</p>
               <p className="estimate-note">أي قياس مستخرج من صورة أو كاميرا يظل تقديريًا حتى المعايرة والتأكيد البشري. جميع المدخلات بالسنتيمتر.</p>
             </div>
