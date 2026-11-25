@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { calculateAreaSquareMeters } from './measurement.js'
+import { calculateFabricRequirement, calculateAreaSquareMeters } from './measurement.js'
 import { ArrowDown, ArrowLeft, Check, ChevronDown, Eye, Menu, Ruler, Sparkles, X } from 'lucide-react'
 
 const fabrics = [
@@ -52,19 +52,30 @@ export default function App() {
   const [fabricId, setFabricId] = useState('linen')
   const [style, setStyle] = useState('wave')
   const [open, setOpen] = useState(false)
-  const [width, setWidth] = useState('300')
-  const [height, setHeight] = useState('270')
+  const [openings, setOpenings] = useState([{ id: 1, name: 'شباك غرفة المعيشة', type: 'window', widthCm: '300', heightCm: '270', hasPelmet: false, pelmetDepthCm: '15', slopeCm: '0', topAllowanceCm: '20', bottomAllowanceCm: '20', fullness: '2', layers: '1', notes: '' }])
+  const [activeOpeningId, setActiveOpeningId] = useState(1)
+  const activeOpening = openings.find(item => item.id === activeOpeningId) || openings[0]
+  const updateOpening = (field, value) => setOpenings(items => items.map(item => item.id === activeOpeningId ? { ...item, [field]: value } : item))
+  const addOpening = () => {
+    const id = Math.max(0, ...openings.map(item => item.id)) + 1
+    setOpenings(items => [...items, { id, name: `فتحة جديدة ${id}`, type: 'window', widthCm: '', heightCm: '', hasPelmet: false, pelmetDepthCm: '15', slopeCm: '0', topAllowanceCm: '20', bottomAllowanceCm: '20', fullness: '2', layers: '1', notes: '' }])
+    setActiveOpeningId(id)
+  }
+  const removeOpening = id => {
+    if (openings.length === 1) return
+    const remaining = openings.filter(item => item.id !== id)
+    setOpenings(remaining)
+    if (activeOpeningId === id) setActiveOpeningId(remaining[0].id)
+  }
   const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
   const [saved, setSaved] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const fabric = fabrics.find(f => f.id === fabricId)
-  const estimate = useMemo(() => {
-    const areaM2 = calculateAreaSquareMeters(width, height)
-    return Math.round(areaM2 * fabric.price * 1.8)
-  }, [width, height, fabric])
+  const openingEstimates = useMemo(() => openings.map(item => ({ ...item, ...calculateFabricRequirement(item, fabric.price) })), [openings, fabric])
+  const estimate = openingEstimates.reduce((sum, item) => sum + item.estimateEgp, 0)
   const saveDesign = () => {
-    const design = { fabric: fabric.name, style: styles.find(s => s.id === style).name, width, height, estimate, savedAt: new Date().toISOString() }
+    const design = { fabric: fabric.name, style: styles.find(s => s.id === style).name, openings, openingEstimates, estimate, savedAt: new Date().toISOString() }
     localStorage.setItem('nss-design', JSON.stringify(design))
     setSaved(true)
     setTimeout(() => setSaved(false), 3500)
@@ -114,11 +125,38 @@ export default function App() {
               <div className="style-list">{styles.map(s => <button key={s.id} className={`style-option ${style === s.id ? 'selected' : ''}`} onClick={() => setStyle(s.id)}><span className={`style-icon ${s.id}`}><i/><i/><i/></span><span><b>{s.name}</b><small>{s.desc}</small></span>{style === s.id && <Check className="style-check" size={17}/>}</button>)}</div>
             </div>
             <div className="control-block dimensions">
-              <div className="control-title"><span className="step">03</span><div><h3>أدخل المقاسات</h3><small>YOUR DIMENSIONS · CM</small></div></div>
-              <div className="dimension-fields"><label>عرض الشباك (سم)<input type="number" min="1" max="2000" step="0.1" inputMode="decimal" value={width} onChange={e => setWidth(e.target.value)} /></label><label>ارتفاع الشباك (سم)<input type="number" min="1" max="2000" step="0.1" inputMode="decimal" value={height} onChange={e => setHeight(e.target.value)} /></label></div>
-              <div className="estimate"><span><Ruler size={16}/> تقدير مبدئي للخامة</span><b>{estimate.toLocaleString('en-US')} <small>ج.م</small></b></div>
-              <p className="estimate-note">المقاسات المدخلة بالسم: {width || 0} × {height || 0} سم · المساحة المحوّلة للحساب: {calculateAreaSquareMeters(width, height).toFixed(2)} م².</p>
-              <p className="estimate-note">تقدير استرشادي للتجربة فقط، والسعر النهائي يتحدد بعد معاينة التفاصيل والمقاسات.</p>
+              <div className="control-title"><span className="step">03</span><div><h3>قياسات الشبابيك والبلكونات</h3><small>ALL DIMENSIONS IN CM · سم</small></div></div>
+              <div className="opening-tabs">
+                {openings.map(item => <div className={item.id === activeOpeningId ? 'opening-tab active' : 'opening-tab'} key={item.id}>
+                  <button type="button" onClick={() => setActiveOpeningId(item.id)}>{item.name}</button>
+                  {openings.length > 1 && <button type="button" aria-label="حذف الفتحة" onClick={() => removeOpening(item.id)}>×</button>}
+                </div>)}
+                <button type="button" className="add-opening" onClick={addOpening}>+ إضافة شباك / بلكونة</button>
+              </div>
+              <label className="wide-field">اسم الفتحة<input value={activeOpening.name} onChange={e => updateOpening('name', e.target.value)} placeholder="مثال: شباك غرفة النوم" /></label>
+              <label className="wide-field">نوع الفتحة<select value={activeOpening.type} onChange={e => updateOpening('type', e.target.value)}><option value="window">شباك</option><option value="balcony">بلكونة / باب جرار</option></select></label>
+              <div className="dimension-fields">
+                <label>العرض (سم)<input type="number" min="1" max="2000" step="0.1" inputMode="decimal" value={activeOpening.widthCm} onChange={e => updateOpening('widthCm', e.target.value)} /></label>
+                <label>الارتفاع (سم)<input type="number" min="1" max="2000" step="0.1" inputMode="decimal" value={activeOpening.heightCm} onChange={e => updateOpening('heightCm', e.target.value)} /></label>
+              </div>
+              <div className="dimension-fields">
+                <label>زيادة أعلى الستارة (سم)<input type="number" min="0" max="200" step="0.5" value={activeOpening.topAllowanceCm} onChange={e => updateOpening('topAllowanceCm', e.target.value)} /></label>
+                <label>زيادة الذيل أسفل (سم)<input type="number" min="0" max="200" step="0.5" value={activeOpening.bottomAllowanceCm} onChange={e => updateOpening('bottomAllowanceCm', e.target.value)} /></label>
+              </div>
+              <div className="dimension-fields">
+                <label>فرق الميل / عدم الاستواء (سم)<input type="number" min="0" max="200" step="0.5" value={activeOpening.slopeCm} onChange={e => updateOpening('slopeCm', e.target.value)} /></label>
+                <label>امتلاء الثنيات<select value={activeOpening.fullness} onChange={e => updateOpening('fullness', e.target.value)}><option value="1.5">خفيف × 1.5</option><option value="2">متوسط × 2</option><option value="2.5">كثيف × 2.5</option><option value="3">فاخر × 3</option></select></label>
+              </div>
+              <label className="wide-field">طبقات القماش<select value={activeOpening.layers} onChange={e => updateOpening('layers', e.target.value)}><option value="1">طبقة واحدة</option><option value="2">شفاف + بلاك أوت (طبقتان)</option></select></label>
+              <label className="pelmet-toggle"><input type="checkbox" checked={activeOpening.hasPelmet} onChange={e => updateOpening('hasPelmet', e.target.checked)} /> يوجد بيت ستارة / صندوق مخفي</label>
+              {activeOpening.hasPelmet && <label className="wide-field">عمق بيت الستارة (سم)<input type="number" min="1" max="200" step="0.5" value={activeOpening.pelmetDepthCm} onChange={e => updateOpening('pelmetDepthCm', e.target.value)} /></label>}
+              <label className="wide-field">ملاحظات المعاينة<textarea rows="2" value={activeOpening.notes} onChange={e => updateOpening('notes', e.target.value)} placeholder="ميول، بروز، عوائق، طريقة التثبيت..." /></label>
+              <div className="estimate"><span><Ruler size={16}/> إجمالي تقدير الخامات</span><b>{estimate.toLocaleString('en-US')} <small>ج.م</small></b></div>
+              <div className="estimate-note">
+                {openingEstimates.map(item => <p key={item.id}>{item.name}: {item.valid ? `${item.fabricAreaM2.toFixed(2)} م² خامة تقريبًا · ${item.estimateEgp.toLocaleString('en-US')} ج.م` : 'أدخل عرضًا وارتفاعًا صحيحين بالسم لإظهار التقدير.'}</p>)}
+              </div>
+              <p className="estimate-note">الحساب استرشادي ويعتمد على معامل الثنيات والزيادات وعدد الطبقات وهالك تقديري. لا يُعد مقايسة نهائية قبل المعاينة وقياس الموقع.</p>
+              <p className="estimate-note">أي قياس مستخرج من صورة أو كاميرا يظل تقديريًا حتى المعايرة والتأكيد البشري. جميع المدخلات بالسنتيمتر.</p>
             </div>
             <button className="save-btn" onClick={saveDesign}>{saved ? <><Check size={17}/> تم حفظ التصميم على جهازك</> : <>احفظ اختياراتي <ArrowLeft size={17}/></>}</button>
           </div>
@@ -133,7 +171,7 @@ export default function App() {
 
       <section className="process" id="how"><div className="process-inner"><div><div className="eyebrow"><span/> من الفكرة للتنفيذ</div><h2>تفاصيلك تستحق<br/><em>اهتماماً خاصاً.</em></h2></div><div className="process-steps"><div><b>01</b><span><strong>اكتشف</strong><small>استكشف الخامات والتصميمات.</small></span></div><div><b>02</b><span><strong>خصّص</strong><small>اختار التفاصيل والمقاسات.</small></span></div><div><b>03</b><span><strong>تواصل</strong><small>ناقش اختيارك مع فريقنا.</small></span></div></div></div></section>
 
-      <section className="contact" id="contact"><div className="contact-copy"><div className="eyebrow dark"><span/> خطوتك التالية</div><h2>خلّينا نبدأ <em>حكاية جديدة.</em></h2><p>شاركنا بياناتك واختياراتك، وفريقنا يقدر يساعدك في الخطوة التالية.</p></div><form className="contact-form" onSubmit={e=>{e.preventDefault();const msg=`مرحباً، أنا ${fullName}. أريد الاستفسار عن تصميم ستائر بخامة ${fabric.name} ومقاس ${width} × ${height} سم. رقم التواصل: ${phone}`;window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank')}}><label>الاسم<input required value={fullName} onChange={e=>setFullName(e.target.value)} placeholder="اكتب اسمك"/></label><label>رقم الهاتف<input required value={phone} onChange={e=>setPhone(e.target.value)} placeholder="01xxxxxxxxx" dir="ltr"/></label><button className="primary-btn" type="submit">تواصل عبر واتساب <ArrowLeft size={17}/></button><small>سيتم فتح واتساب برسالة جاهزة، ولن يتم إرسال بياناتك تلقائياً.</small></form></section>
+      <section className="contact" id="contact"><div className="contact-copy"><div className="eyebrow dark"><span/> خطوتك التالية</div><h2>خلّينا نبدأ <em>حكاية جديدة.</em></h2><p>شاركنا بياناتك واختياراتك، وفريقنا يقدر يساعدك في الخطوة التالية.</p></div><form className="contact-form" onSubmit={e=>{e.preventDefault();const details = openings.map(item => `${item.name}: ${item.widthCm} × ${item.heightCm} سم`).join('؛ ');const msg=`مرحباً، أنا ${fullName}. أريد الاستفسار عن تصميم ستائر بخامة ${fabric.name}، والمقاسات: ${details}. رقم التواصل: ${phone}`;window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank')}}><label>الاسم<input required value={fullName} onChange={e=>setFullName(e.target.value)} placeholder="اكتب اسمك"/></label><label>رقم الهاتف<input required value={phone} onChange={e=>setPhone(e.target.value)} placeholder="01xxxxxxxxx" dir="ltr"/></label><button className="primary-btn" type="submit">تواصل عبر واتساب <ArrowLeft size={17}/></button><small>سيتم فتح واتساب برسالة جاهزة، ولن يتم إرسال بياناتك تلقائياً.</small></form></section>
     </main>
     <footer><a className="brand footer-brand" href="#home"><span className="brand-mark">NS</span><span><b>NAGUIB SELIM</b><small>STUDIO · CURTAINS & FABRICS</small></span></a><span>© 2026 Naguib Selim Studio. جميع الحقوق محفوظة.</span><a href="#home">العودة للأعلى <ArrowDown size={14}/></a></footer>
   </div>
