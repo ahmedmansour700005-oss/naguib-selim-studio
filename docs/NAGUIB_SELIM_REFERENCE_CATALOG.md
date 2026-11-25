@@ -56,6 +56,18 @@ Additional curtain product pages found:
 - ستارة بلاك أوت كتان — https://naguibselim.com/products/بلاك-اوت-كتان (observed 514.00 EGP)
 - ستائر ذات ملمس ترابي دافئ — https://naguibselim.com/products/terra (observed 1,146.50 EGP)
 
+### Blackout curtains
+Source collection: https://naguibselim.com/collections/blackout
+
+Products found:
+- قماش ستائر LEXSA_X2_BLACKOUT — price not reliably exposed in collection snapshot; https://naguibselim.com/collections/blackout
+- بلانكا 3_بلاك آوت الولايات المتحدة — price not exposed in snapshot; https://naguibselim.com/collections/blackout
+- بلانكا 1 (Blanca 1 US Edition) — price not exposed in snapshot; https://naguibselim.com/collections/blackout
+- بلانكا 2 (Blanca 2 US Edition) — price not exposed in snapshot; https://naguibselim.com/collections/blackout
+- ستان (STAN) — price not exposed in snapshot; https://naguibselim.com/collections/blackout
+- ستارة بلاك أوت كتان — 514.00 EGP (was 857.00); https://naguibselim.com/products/بلاك-اوت-كتان
+- ستارة بلاك أوت ليكسا — 683.00 EGP; https://naguibselim.com/products/بلاك-اوت-ليكسا
+
 ## Upholstery and fabric categories
 Source: https://naguibselim.com/pages/fabric
 
@@ -79,7 +91,10 @@ Products/prices visible in the fabric landing page:
 No dedicated curtain-accessories collection with a verifiable public product/price list was surfaced in the pages checked on 2026-11-25. Do not invent curtain rail, track, rod, finial, bracket, tieback, ring, hook, motor, or installation prices. Keep these as pending catalog entries until official product pages or a supplier price list is available.
 
 ## Images and usage
-Product detail pages on the official store contain product gallery images and color/variant swatches. Use the official product page as the canonical image source and link to it from the app. Do not hotlink guessed image filenames or treat category tile images as fabric swatches. For accurate in-room material rendering, obtain/prepare high-resolution fabric texture images and confirm color variants; product lifestyle photos are not calibrated texture maps.
+Product detail pages on the official store contain product gallery images and color/variant swatches. Example verified image URLs for product 31366:
+- Lifestyle + swatch board: https://naguibselim.com/cdn/shop/files/31366copy.jpg?v=1774363922&width=3840
+- Close-up texture: https://naguibselim.com/cdn/shop/files/1_dee38c43-1a12-4652-a49b-ce6b7cd8d319.jpg?v=1774363922&width=3840
+- Upholstery application: https://naguibselim.com/cdn/shop/files/3_65507ff6-391f-4334-9690-894e065873ad.jpg?v=1774363922&width=3840 Use the official product page as the canonical image source and link to it from the app. Do not hotlink guessed image filenames or treat category tile images as fabric swatches. For accurate in-room material rendering, obtain/prepare high-resolution fabric texture images and confirm color variants; product lifestyle photos are not calibrated texture maps.
 
 ## Implementation rules for the app
 1. Preserve original Arabic product names and optional English model names.
