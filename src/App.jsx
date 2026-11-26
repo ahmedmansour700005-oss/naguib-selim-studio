@@ -89,8 +89,14 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, opening, materialIm
     const mat = (color, roughness=.78, metalness=0) => new THREE.MeshStandardMaterial({color,roughness,metalness})
     const floor = new THREE.Mesh(new THREE.PlaneGeometry(18,18),mat('#b5a58e'))
     floor.rotation.x = -Math.PI/2; floor.position.y = -0.03; floor.receiveShadow = true; scene.add(floor)
-    const backWall = new THREE.Mesh(new THREE.PlaneGeometry(12,6),mat('#e8e0d3'))
-    backWall.position.set(0,3,-3.2); backWall.receiveShadow=true; scene.add(backWall)
+    const backWallMaterial=mat('#e8e0d3')
+    const makeBackWallPanel=()=>{const panel=new THREE.Mesh(new THREE.PlaneGeometry(1,1),backWallMaterial);panel.position.z=-3.2;panel.receiveShadow=true;scene.add(panel);return panel}
+    const windowWallParts={left:makeBackWallPanel(),right:makeBackWallPanel(),top:makeBackWallPanel(),bottom:makeBackWallPanel()}
+    const initialSideWidth=(12-4.15)/2
+    windowWallParts.left.scale.set(initialSideWidth,6,1);windowWallParts.left.position.set(-(4.15/2+initialSideWidth/2),3,-3.2)
+    windowWallParts.right.scale.set(initialSideWidth,6,1);windowWallParts.right.position.set(4.15/2+initialSideWidth/2,3,-3.2)
+    windowWallParts.top.scale.set(4.15,2.225,1);windowWallParts.top.position.y=4.8875
+    windowWallParts.bottom.scale.set(4.15,1.125,1);windowWallParts.bottom.position.y=.5625
     const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(6.5,6),mat('#d8cbbb'))
     leftWall.rotation.y=Math.PI/2; leftWall.position.set(-6,3,0); scene.add(leftWall)
     const rightWall = new THREE.Mesh(new THREE.PlaneGeometry(6.5,6),mat('#d8cbbb'))
@@ -267,7 +273,7 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, opening, materialIm
     let frame=0
     const animate=()=>{frame=requestAnimationFrame(animate);curtainMeshes.forEach(mesh=>{if(Number.isFinite(mesh.userData.targetX))mesh.position.x+=(mesh.userData.targetX-mesh.position.x)*.12});controls.update();renderer.render(scene,camera)}
     animate()
-    sceneRef.current={THREE,scene,renderer,camera,controls,curtainMeshes,curtainMat,sofaMat,makeFabricTexture,makeFabricDetailMaps,windowFrame,curtainRod}
+    sceneRef.current={THREE,scene,renderer,camera,controls,curtainMeshes,curtainMat,sofaMat,makeFabricTexture,makeFabricDetailMaps,windowFrame,windowWallParts,curtainRod}
     setReady(true)
     return ()=>{cancelAnimationFrame(frame);observer.disconnect();mount.removeEventListener('keydown',walk);mount.removeEventListener('pointerdown',focusScene);controls.dispose();renderer.dispose();scene.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>m.dispose())}});if(renderer.domElement.parentNode===mount)mount.removeChild(renderer.domElement);sceneRef.current=null;setReady(false)}
   }, [roomId])
@@ -311,6 +317,11 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, opening, materialIm
     const openingHeight=state.THREE.MathUtils.clamp(Number.isFinite(heightValue)&&heightValue>0?(heightValue+topAllowance+bottomAllowance)/100:3,1.2,3.8)
     const windowScaleY=openingHeight/2.65
     state.windowFrame.scale.set(openingWidth/4.15,windowScaleY,1);state.windowFrame.position.y=2.45-2.45*windowScaleY
+    const wallSideWidth=(12-openingWidth)/2;const wallTopY=2.45+openingHeight/2;const wallBottomY=2.45-openingHeight/2
+    state.windowWallParts.left.scale.set(wallSideWidth,6,1);state.windowWallParts.left.position.x=-(openingWidth/2+wallSideWidth/2)
+    state.windowWallParts.right.scale.set(wallSideWidth,6,1);state.windowWallParts.right.position.x=openingWidth/2+wallSideWidth/2
+    state.windowWallParts.top.scale.set(openingWidth,Math.max(.05,6-wallTopY),1);state.windowWallParts.top.position.y=(6+wallTopY)/2
+    state.windowWallParts.bottom.scale.set(openingWidth,Math.max(.05,wallBottomY),1);state.windowWallParts.bottom.position.y=wallBottomY/2
     const topY=2.45+1.43*windowScaleY;state.curtainRod.scale.x=openingWidth/4.15;state.curtainRod.position.y=topY+.06;const fullness=state.THREE.MathUtils.clamp(Number(opening?.fullness)||2,1.2,3)
     state.curtainMeshes.forEach(mesh=>{
       mesh.scale.x=(openingWidth/2)/1.22;mesh.scale.y=openingHeight/2.95;mesh.position.y=topY-openingHeight/2
