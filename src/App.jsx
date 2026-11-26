@@ -121,8 +121,34 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, opening, materialIm
       const texture=new THREE.CanvasTexture(canvas);texture.wrapS=texture.wrapT=THREE.RepeatWrapping
       texture.repeat.set(scale,scale);texture.encoding=THREE.sRGBEncoding;return texture
     }
-    const curtainMat = new THREE.MeshStandardMaterial({map:makeFabricTexture('#c7b79e'),roughness:.96,side:THREE.DoubleSide})
-    const sofaMat = new THREE.MeshStandardMaterial({map:makeFabricTexture(upholstery,'woven'),roughness:.95})
+    const makeFabricDetailMaps = (pattern='linen',scale=2) => {
+      const size=128;const normalCanvas=document.createElement('canvas');normalCanvas.width=size;normalCanvas.height=size
+      const normalContext=normalCanvas.getContext('2d');const normalPixels=normalContext.createImageData(size,size)
+      const woven=pattern==='woven';const cyclesX=woven?18:13;const cyclesY=woven?18:9
+      const heightAt=(x,y)=>woven
+        ? Math.sin(x/size*Math.PI*2*cyclesX)*Math.cos(y/size*Math.PI*2*cyclesY)*.18
+        : Math.sin(x/size*Math.PI*2*cyclesX)*.12+Math.sin(y/size*Math.PI*2*cyclesY)*.08
+      for(let y=0;y<size;y++)for(let x=0;x<size;x++){
+        const dx=(heightAt(x+1,y)-heightAt(x-1,y))*22;const dy=(heightAt(x,y+1)-heightAt(x,y-1))*22
+        let nx=-dx,ny=-dy,nz=1;const length=Math.hypot(nx,ny,nz);nx/=length;ny/=length;nz/=length
+        const offset=(y*size+x)*4;normalPixels.data[offset]=Math.round((nx*.5+.5)*255);normalPixels.data[offset+1]=Math.round((ny*.5+.5)*255);normalPixels.data[offset+2]=Math.round((nz*.5+.5)*255);normalPixels.data[offset+3]=255
+      }
+      normalContext.putImageData(normalPixels,0,0)
+      const roughCanvas=document.createElement('canvas');roughCanvas.width=size;roughCanvas.height=size
+      const roughContext=roughCanvas.getContext('2d');const roughPixels=roughContext.createImageData(size,size)
+      for(let y=0;y<size;y++)for(let x=0;x<size;x++){
+        const weaveShade= woven ? Math.sin(x/size*Math.PI*2*cyclesX)*Math.sin(y/size*Math.PI*2*cyclesY)*7 : Math.sin(x/size*Math.PI*2*cyclesX)*4
+        const value=Math.max(0,Math.min(255,Math.round(232+weaveShade)))
+        const offset=(y*size+x)*4;roughPixels.data[offset]=value;roughPixels.data[offset+1]=value;roughPixels.data[offset+2]=value;roughPixels.data[offset+3]=255
+      }
+      roughContext.putImageData(roughPixels,0,0)
+      const makeMap=canvas=>{const map=new THREE.CanvasTexture(canvas);map.wrapS=map.wrapT=THREE.RepeatWrapping;map.repeat.set(scale,scale);return map}
+      return {normalMap:makeMap(normalCanvas),roughnessMap:makeMap(roughCanvas)}
+    }
+    const curtainDetails=makeFabricDetailMaps('linen',2)
+    const sofaDetails=makeFabricDetailMaps('woven',2)
+    const curtainMat = new THREE.MeshStandardMaterial({map:makeFabricTexture('#c7b79e'),normalMap:curtainDetails.normalMap,roughnessMap:curtainDetails.roughnessMap,roughness:.96,side:THREE.DoubleSide})
+    const sofaMat = new THREE.MeshStandardMaterial({map:makeFabricTexture(upholstery,'woven'),normalMap:sofaDetails.normalMap,roughnessMap:sofaDetails.roughnessMap,roughness:.95})
     const curtainGroup = new THREE.Group()
     const curtainMeshes=[]
     const createCurtainPanel = (side) => {
@@ -241,7 +267,7 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, opening, materialIm
     let frame=0
     const animate=()=>{frame=requestAnimationFrame(animate);curtainMeshes.forEach(mesh=>{if(Number.isFinite(mesh.userData.targetX))mesh.position.x+=(mesh.userData.targetX-mesh.position.x)*.12});controls.update();renderer.render(scene,camera)}
     animate()
-    sceneRef.current={THREE,scene,renderer,camera,controls,curtainMeshes,curtainMat,sofaMat,makeFabricTexture,windowFrame,curtainRod}
+    sceneRef.current={THREE,scene,renderer,camera,controls,curtainMeshes,curtainMat,sofaMat,makeFabricTexture,makeFabricDetailMaps,windowFrame,curtainRod}
     setReady(true)
     return ()=>{cancelAnimationFrame(frame);observer.disconnect();mount.removeEventListener('keydown',walk);mount.removeEventListener('pointerdown',focusScene);controls.dispose();renderer.dispose();scene.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>m.dispose())}});if(renderer.domElement.parentNode===mount)mount.removeChild(renderer.domElement);sceneRef.current=null;setReady(false)}
   }, [roomId])
@@ -249,8 +275,12 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, opening, materialIm
   useEffect(()=>{
     const state=sceneRef.current;if(!state)return
     const color=fabric?.color||'#c7b79e'
-    const fallbackTexture=state.makeFabricTexture(color, fabric?.texture||'linen',materialScale)
-    state.curtainMat.map?.dispose();state.curtainMat.map=fallbackTexture;state.curtainMat.needsUpdate=true
+    const pattern=fabric?.texture||'linen'
+    const fallbackTexture=state.makeFabricTexture(color,pattern,materialScale)
+    const curtainDetails=state.makeFabricDetailMaps(pattern,materialScale)
+    state.curtainMat.map?.dispose();state.curtainMat.map=fallbackTexture
+    state.curtainMat.normalMap?.dispose();state.curtainMat.normalMap=curtainDetails.normalMap
+    state.curtainMat.roughnessMap?.dispose();state.curtainMat.roughnessMap=curtainDetails.roughnessMap;state.curtainMat.needsUpdate=true
     let active=true
     const loader=new state.THREE.TextureLoader();loader.setCrossOrigin('anonymous')
     if(materialImage){
@@ -262,7 +292,10 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, opening, materialIm
       },undefined,()=>{})
     }
     const sofaTexture=state.makeFabricTexture(upholstery,'woven',materialScale)
-    state.sofaMat.map?.dispose();state.sofaMat.map=sofaTexture;state.sofaMat.needsUpdate=true
+    const sofaDetails=state.makeFabricDetailMaps('woven',materialScale)
+    state.sofaMat.map?.dispose();state.sofaMat.map=sofaTexture
+    state.sofaMat.normalMap?.dispose();state.sofaMat.normalMap=sofaDetails.normalMap
+    state.sofaMat.roughnessMap?.dispose();state.sofaMat.roughnessMap=sofaDetails.roughnessMap;state.sofaMat.needsUpdate=true
     if(upholsteryImage){
       loader.load(upholsteryImage,texture=>{
         if(!active){texture.dispose();return}
@@ -301,7 +334,7 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, opening, materialIm
       <label className="texture-scale-control">مقياس نقشة القماش <input type="range" min="1" max="6" step="0.25" value={materialScale} onChange={event=>setMaterialScale(Number(event.target.value))}/><span>{materialScale.toFixed(2)}×</span></label>
       <label className="texture-scale-control">شفافية الستارة <input type="range" min="0.35" max="1" step="0.05" value={fabricOpacity} onChange={event=>setFabricOpacity(Number(event.target.value))}/><span>{Math.round(fabricOpacity*100)}%</span></label>
     </div>
-    <div className="preview-caption">مشهد 3D تجريبي مولّد داخل المتصفح؛ يمكن تدويره، وبعد النقر عليه التحرك داخل حدود الغرفة بمفاتيح W A S D. {materialImage ? 'تم تطبيق صورة الخامة المختارة كنسيج بصري إرشادي على الستارة، وليست خريطة PBR معايرة أو محاكاة دقيقة لاتجاه النسيج والإضاءة.' : 'يُستخدم نسيج إجرائي مؤقت حتى اختيار خامة لها صورة موثقة.'} أبعاد الشباك والستارة تتغير حسب قياسات الفتحة النشطة بالسم، كمعاينة تقريبية وليست رسماً تنفيذياً معتمداً. ليس تصويرًا فوتوغرافيًا أو جولة 360° ملتقطة.</div>
+    <div className="preview-caption">مشهد 3D تجريبي مولّد داخل المتصفح؛ يمكن تدويره، وبعد النقر عليه التحرك داخل حدود الغرفة بمفاتيح W A S D. {materialImage ? 'تم تطبيق صورة الخامة كمرجع بصري، مع خرائط نتوء وخشونة إجرائية لتحسين استجابة الضوء؛ لكنها ليست خرائط PBR مصوّرة أو معايرة للقماش الفعلي.' : 'يُستخدم نسيج إجرائي مؤقت حتى اختيار خامة لها صورة موثقة.'} أبعاد الشباك والستارة تتغير حسب قياسات الفتحة النشطة بالسم، كمعاينة تقريبية وليست رسماً تنفيذياً معتمداً. ليس تصويرًا فوتوغرافيًا أو جولة 360° ملتقطة.</div>
   </div>
 }
 
