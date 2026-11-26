@@ -415,7 +415,7 @@ export default function App() {
     image.onerror = () => { URL.revokeObjectURL(url); window.alert('تعذر قراءة ملف الصورة. جرّب صورة أخرى.'); event.target.value = '' }
     image.src = url
   }
-  const changeRoom = id => { const room = demoRooms.find(item => item.id === id); if (!room) return; setRoomId(id); setViewMode('3d'); setOpenings(room.openings.map(item => ({...item}))); setActiveOpeningId(room.openings[0].id) }
+  const changeRoom = id => { const room = demoRooms.find(item => item.id === id); if (!room) return; setRoomId(id); setActivePanoramaIndex(0); setViewMode('3d'); setOpenings(room.openings.map(item => ({...item}))); setActiveOpeningId(room.openings[0].id) }
   const [activeOpeningId, setActiveOpeningId] = useState(demoRooms[0].openings[0].id)
   const activeOpening = openings.find(item => item.id === activeOpeningId) || openings[0]
   const updateOpening = (field, value) => setOpenings(items => items.map(item => item.id === activeOpeningId ? { ...item, [field]: value } : item))
