@@ -195,7 +195,7 @@ function RoomPreview({ fabric, style, open, setOpen, roomId }) {
   },[fabric,upholstery,open,style,ready])
 
   return <div className="room-shell model-shell">
-    <div className="room-top"><span>{demoRooms.find(room=>room.id===roomId)?.name || 'استوديو ثلاثي الأبعاد'}</span><span className="live-dot">{ready?'المشهد ثلاثي الأبعاد جاهز':'جارٍ تجهيز المشهد'}</span></div>
+    <div className="room-top"><span>{demoRooms.find(room=>room.id===roomId)?.name || 'استوديو ثلاثي الأبعاد'}</span><span className="live-dot">{ready?'3D تفاعلي جاهز · 360° يتطلب صور الغرف':'جارٍ تجهيز المشهد'}</span></div>
     <div className="model-stage" ref={host} aria-label="غرفة ثلاثية الأبعاد قابلة للدوران وتخصيص الأقمشة">
       {!ready&&<div className="model-loading">جارٍ تحميل الاستوديو ثلاثي الأبعاد…</div>}
       <div className="model-badge">3D · تحريك وتدوير بالماوس أو اللمس</div>
@@ -225,7 +225,7 @@ export default function App() {
   const activeOpening = openings.find(item => item.id === activeOpeningId) || openings[0]
   const updateOpening = (field, value) => setOpenings(items => items.map(item => item.id === activeOpeningId ? { ...item, [field]: value } : item))
   const addOpening = () => {
-    const id = Math.max(0, ...openings.map(item => item.id)) + 1
+    const id = Math.max(0, ...openings.map(item => Number(item.id) || 0)) + 1
     setOpenings(items => [...items, { id, name: `فتحة جديدة ${id}`, type: 'window', widthCm: '', heightCm: '', hasPelmet: false, pelmetDepthCm: '15', slopeCm: '0', topAllowanceCm: '20', bottomAllowanceCm: '20', fullness: '2', layers: '1', notes: '' }])
     setActiveOpeningId(id)
   }
