@@ -3,7 +3,7 @@
 // Keep photographic 360 viewpoints separate from the free-orbit 3D scene.
 export function isValidPanoramaAsset(asset) {
   if (!asset || typeof asset !== 'object') return false
-  if (typeof asset.src !== 'string' || !/^https?:\/\//i.test(asset.src)) return false
+  if (typeof asset.src !== 'string' || !/^(https?:\/\/|blob:)/i.test(asset.src)) return false
   if (asset.projection !== 'equirectangular') return false
   if (Number(asset.width) <= 0 || Number(asset.height) <= 0) return false
   return Math.abs(Number(asset.width) / Number(asset.height) - 2) < 0.015

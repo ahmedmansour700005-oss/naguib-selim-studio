@@ -4,6 +4,7 @@ import { describeMaterialFidelity, getRoomViewingModes, isUsableFabricMaterial, 
 
 test('accepts only real 2:1 equirectangular panorama assets', () => {
   assert.equal(isValidPanoramaAsset({ src: 'https://assets.example/room.jpg', projection: 'equirectangular', width: 6000, height: 3000 }), true)
+  assert.equal(isValidPanoramaAsset({ src: 'blob:https://studio.local/room-preview', projection: 'equirectangular', width: 6000, height: 3000 }), true)
   assert.equal(isValidPanoramaAsset({ src: '/room.jpg', projection: 'equirectangular', width: 6000, height: 3000 }), false)
   assert.equal(isValidPanoramaAsset({ src: 'https://assets.example/room.jpg', projection: 'perspective', width: 6000, height: 3000 }), false)
   assert.equal(isValidPanoramaAsset({ src: 'https://assets.example/room.jpg', projection: 'equirectangular', width: 4000, height: 3000 }), false)

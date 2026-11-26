@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { calculateFabricRequirement } from './measurement.js'
 import { enrichedFabricCatalog as fabricCatalog } from './fabricCatalog.js'
 import { demoRooms, designDirections } from './demoRooms.js'
-import { getRoomViewingModes } from './sceneAssets.js'
+import { getRoomViewingModes, isValidPanoramaAsset } from './sceneAssets.js'
 import { ArrowDown, ArrowLeft, Check, ChevronDown, Eye, Menu, Ruler, Sparkles, X } from 'lucide-react'
 
 const fabrics = [
@@ -352,6 +352,9 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, opening, materialIm
 export default function App() {
   const [roomId, setRoomId] = useState('living')
   const [viewMode, setViewMode] = useState('3d')
+  const [panoramaOverrides, setPanoramaOverrides] = useState({})
+  const panoramaObjectUrls = useRef(new Set())
+  useEffect(() => () => { panoramaObjectUrls.current.forEach(url => URL.revokeObjectURL(url)); panoramaObjectUrls.current.clear() }, [])
   const [fabricId, setFabricId] = useState('linen')
   const [catalogQuery, setCatalogQuery] = useState('')
   const [selectedCatalogId, setSelectedCatalogId] = useState('')
@@ -364,8 +367,34 @@ export default function App() {
   const [style, setStyle] = useState('wave')
   const [open, setOpen] = useState(false)
   const [openings, setOpenings] = useState(demoRooms[0].openings)
-  const activeRoom = demoRooms.find(room => room.id === roomId) || demoRooms[0]
+  const activeRoomBase = demoRooms.find(room => room.id === roomId) || demoRooms[0]
+  const activeRoom = { ...activeRoomBase, panorama: panoramaOverrides[roomId] || activeRoomBase.panorama }
   const viewingModes = getRoomViewingModes(activeRoom)
+  const handlePanoramaUpload = event => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    const targetRoomId = roomId
+    if (!/^image\/(jpeg|png|webp)$/i.test(file.type)) { window.alert('ارفع صورة JPG أو PNG أو WebP.'); event.target.value = ''; return }
+    if (file.size > 35 * 1024 * 1024) { window.alert('حجم الصورة أكبر من 35 ميجابايت؛ قلّل الحجم ثم حاول مرة أخرى.'); event.target.value = ''; return }
+    const url = URL.createObjectURL(file)
+    const image = new Image()
+    image.onload = () => {
+      const asset = { src: url, projection: 'equirectangular', width: image.naturalWidth, height: image.naturalHeight, sourceName: file.name }
+      if (!isValidPanoramaAsset(asset)) {
+        URL.revokeObjectURL(url)
+        window.alert(`الصورة ليست بانوراما 360° بنسبة 2:1. أبعاد الصورة الحالية: ${image.naturalWidth} × ${image.naturalHeight}.`)
+        return
+      }
+      const previousUrl = panoramaOverrides[targetRoomId]?.src
+      if (previousUrl?.startsWith('blob:')) { URL.revokeObjectURL(previousUrl); panoramaObjectUrls.current.delete(previousUrl) }
+      panoramaObjectUrls.current.add(url)
+      setPanoramaOverrides(items => ({ ...items, [targetRoomId]: asset }))
+      setViewMode('360')
+      event.target.value = ''
+    }
+    image.onerror = () => { URL.revokeObjectURL(url); window.alert('تعذر قراءة ملف الصورة. جرّب صورة أخرى.'); event.target.value = '' }
+    image.src = url
+  }
   const changeRoom = id => { const room = demoRooms.find(item => item.id === id); if (!room) return; setRoomId(id); setViewMode('3d'); setOpenings(room.openings.map(item => ({...item}))); setActiveOpeningId(room.openings[0].id) }
   const [activeOpeningId, setActiveOpeningId] = useState(demoRooms[0].openings[0].id)
   const activeOpening = openings.find(item => item.id === activeOpeningId) || openings[0]
@@ -452,7 +481,7 @@ export default function App() {
 
       <section className="studio-section" id="studio">
         <div className="section-heading"><div><div className="eyebrow dark"><span/> مساحة التجربة</div><h2>صمّمها كما <em>تتخيّلها</em></h2></div><p>غيّر الخامة والستايل، وعاين النتيجة فوراً. اختياراتك محفوظة على جهازك.</p></div>
-        <div className="design-directions"><div className="directions-heading"><b>3 اتجاهات تصميم مقترحة</b><small>اختار مستوى يناسب ذوقك وميزانيتك؛ الأسعار النهائية تعتمد على تسعير المعرض</small></div><div className="direction-cards">{designDirections.map(direction=><button type="button" key={direction.id} className="direction-card" onClick={()=>{setFabricId(direction.fabricId);setSelectedCatalogId('');setStyle(direction.styleId);setOpenings(items=>items.map(item=>({...item,layers:String(direction.layers),fullness:String(direction.fullness)})))}}><span>{direction.tier}</span><b>{direction.name}</b><small>{direction.description}</small><em>جرّب التصميم</em></button>)}</div></div><div className="demo-room-switcher" aria-label="اختيار غرفة العرض"><div><b>اختر مساحة التجربة</b><small>شقة تجريبية متنوعة · Living / Bedroom / Balcony</small></div><div className="demo-room-buttons">{demoRooms.map(room=><button type="button" key={room.id} className={roomId===room.id?'active':''} onClick={()=>changeRoom(room.id)}>{room.name}</button>)}</div></div><div className="view-mode-status" aria-label="حالة أوضاع المعاينة"><button type="button" className={viewMode === "3d" ? "view-mode-card active" : "view-mode-card"} onClick={() => setViewMode("3d")}><b>{viewingModes.model3d.label}</b><small>{viewingModes.model3d.description}</small><span>متاح الآن</span></button><button type="button" className={viewingModes.panorama.available ? (viewMode === "360" ? "view-mode-card active" : "view-mode-card") : "view-mode-card unavailable"} disabled={!viewingModes.panorama.available} onClick={() => setViewMode("360")}><b>{viewingModes.panorama.label}</b><small>{viewingModes.panorama.description}</small><span>{viewingModes.panorama.available ? "افتح الجولة المصوّرة" : "بانوراما أصلية مرخصة غير مضافة بعد"}</span></button></div><div className="configurator">
+        <div className="design-directions"><div className="directions-heading"><b>3 اتجاهات تصميم مقترحة</b><small>اختار مستوى يناسب ذوقك وميزانيتك؛ الأسعار النهائية تعتمد على تسعير المعرض</small></div><div className="direction-cards">{designDirections.map(direction=><button type="button" key={direction.id} className="direction-card" onClick={()=>{setFabricId(direction.fabricId);setSelectedCatalogId('');setStyle(direction.styleId);setOpenings(items=>items.map(item=>({...item,layers:String(direction.layers),fullness:String(direction.fullness)})))}}><span>{direction.tier}</span><b>{direction.name}</b><small>{direction.description}</small><em>جرّب التصميم</em></button>)}</div></div><div className="demo-room-switcher" aria-label="اختيار غرفة العرض"><div><b>اختر مساحة التجربة</b><small>شقة تجريبية متنوعة · Living / Bedroom / Balcony</small></div><div className="demo-room-buttons">{demoRooms.map(room=><button type="button" key={room.id} className={roomId===room.id?'active':''} onClick={()=>changeRoom(room.id)}>{room.name}</button>)}</div></div><div className="view-mode-status" aria-label="حالة أوضاع المعاينة"><button type="button" className={viewMode === "3d" ? "view-mode-card active" : "view-mode-card"} onClick={() => setViewMode("3d")}><b>{viewingModes.model3d.label}</b><small>{viewingModes.model3d.description}</small><span>متاح الآن</span></button><button type="button" className={viewingModes.panorama.available ? (viewMode === "360" ? "view-mode-card active" : "view-mode-card") : "view-mode-card unavailable"} disabled={!viewingModes.panorama.available} onClick={() => setViewMode("360")}><b>{viewingModes.panorama.label}</b><small>{viewingModes.panorama.description}</small><span>{viewingModes.panorama.available ? "افتح الجولة المصوّرة" : "بانوراما أصلية مرخصة غير مضافة بعد"}</span></button></div><label className="panorama-upload-control"><span>إضافة صورة بانوراما 360° للغرفة الحالية</span><input type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePanoramaUpload}/><small>الصورة لازم تكون 2:1 بنظام equirectangular. الملف يظل داخل المتصفح الحالي ولا يُرفع إلى خادم.</small></label><div className="configurator">
           <div className="controls">
             <div className="control-block">
               <div className="control-title"><span className="step">01</span><div><h3>اختر الخامة</h3><small>FABRIC COLLECTION</small></div></div>
