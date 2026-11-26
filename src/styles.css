@@ -98,3 +98,18 @@ footer{background:#eee9df;color:#716b60}
 .panorama-actions a{font-size:11px;color:#8b6a43;text-decoration:underline}
 .panorama-shell .preview-caption{position:static;padding:8px 2px 0;color:#756e64;font-size:10px}
 @media(max-width:700px){.panorama-scene{height:62vh;min-height:380px}.panorama-hint{font-size:9px;right:8px;bottom:8px}.panorama-actions{align-items:flex-start;flex-direction:column}.panorama-actions .preview-toggle{width:auto}}
+
+
+/* Interactive real-time 3D room configurator */
+.model-shell{background:#e9e1d5;padding:14px;min-height:0}
+.model-stage{height:clamp(430px,58vw,680px);min-height:430px;position:relative;overflow:hidden;background:radial-gradient(ellipse at 50% 38%,#eee7dc,#b9aa94);border-radius:5px;touch-action:pan-y}
+.model-stage canvas{display:block;width:100%;height:100%;outline:none}
+.model-loading{position:absolute;inset:0;display:grid;place-items:center;background:#e6ddcf;color:#5c5041;z-index:2;font-size:14px}
+.model-badge{position:absolute;bottom:14px;right:14px;background:#201c18d9;color:#fff;padding:9px 13px;border-radius:24px;font-size:11px;pointer-events:none}
+.model-tools{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:14px 2px 5px;color:#51483d;font-size:12px}
+.model-tools .preview-toggle{position:static;margin:0;border-radius:3px}
+.upholstery-picker{display:flex;align-items:center;gap:8px;margin-inline-start:auto}
+.upholstery-picker button{width:24px;height:24px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #b9aa94;cursor:pointer}
+.upholstery-picker button.active{box-shadow:0 0 0 2px #977447}
+.model-shell .preview-caption{position:static;padding:9px 2px 0;color:#756e64;font-size:10px;line-height:1.7}
+@media(max-width:700px){.model-stage{height:60vh;min-height:390px}.model-tools{gap:10px}.upholstery-picker{margin-inline-start:0;width:100%}}
