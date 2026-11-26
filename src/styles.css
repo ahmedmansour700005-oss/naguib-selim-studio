@@ -142,3 +142,16 @@ footer{background:#eee9df;color:#716b60}
 .view-mode-card.unavailable{border-color:#e6e2d9;background:#f3f1eb}
 .view-mode-card.unavailable span{color:#8a7460}
 @media(max-width:700px){.view-mode-status{grid-template-columns:1fr;gap:8px}.view-mode-card{padding:13px}}
+
+.view-mode-card{font:inherit;text-align:right;cursor:pointer;transition:border-color .2s,background .2s}
+.view-mode-card:disabled{cursor:not-allowed}
+.view-mode-card.active{border-color:#a88d65;background:#f4f0e7;box-shadow:inset -3px 0 #a88d65}
+.view-mode-card:not(:disabled):hover{border-color:#a88d65}
+.panorama-shell{display:flex;flex-direction:column;min-height:610px}
+.panorama-stage{height:520px;min-height:360px;position:relative;overflow:hidden;background:#202923;touch-action:pan-y}
+.panorama-stage canvas{display:block;width:100%;height:100%;cursor:grab}
+.panorama-stage canvas:active{cursor:grabbing}
+.panorama-message{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;color:#f4f0e6;font-size:13px;line-height:2;pointer-events:none;z-index:1}
+.panorama-stage .model-badge{z-index:2}
+.panorama-note{font-size:10px;line-height:1.9;color:#77786e;margin:10px 3px 0}
+@media(max-width:650px){.panorama-shell{min-height:420px}.panorama-stage{height:350px;min-height:300px}.panorama-note{font-size:9px}}
