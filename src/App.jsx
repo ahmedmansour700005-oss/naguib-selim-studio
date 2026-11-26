@@ -206,7 +206,7 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, materialImage }) {
     const resize=()=>{if(!mount.clientWidth||!mount.clientHeight)return;camera.aspect=mount.clientWidth/mount.clientHeight;camera.updateProjectionMatrix();renderer.setSize(mount.clientWidth,mount.clientHeight)}
     const observer=new ResizeObserver(resize);observer.observe(mount)
     let frame=0
-    const animate=()=>{frame=requestAnimationFrame(animate);controls.update();renderer.render(scene,camera)}
+    const animate=()=>{frame=requestAnimationFrame(animate);curtainMeshes.forEach(mesh=>{if(Number.isFinite(mesh.userData.targetX))mesh.position.x+=(mesh.userData.targetX-mesh.position.x)*.12});controls.update();renderer.render(scene,camera)}
     animate()
     sceneRef.current={THREE,scene,renderer,camera,controls,curtainMeshes,curtainMat,sofaMat,makeFabricTexture}
     setReady(true)
@@ -230,7 +230,7 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, materialImage }) {
     }
     const sofaTexture=state.makeFabricTexture(upholstery,'woven')
     state.sofaMat.map?.dispose();state.sofaMat.map=sofaTexture;state.sofaMat.needsUpdate=true
-    state.curtainMeshes.forEach(mesh=>{mesh.position.x=open?mesh.userData.openX:mesh.userData.closedX;mesh.userData.applyStyle?.(style)})
+    state.curtainMeshes.forEach(mesh=>{mesh.userData.targetX=open?mesh.userData.openX:mesh.userData.closedX;mesh.userData.applyStyle?.(style)})
     return ()=>{active=false}
   },[fabric,upholstery,open,style,ready,materialImage])
 
