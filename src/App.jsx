@@ -100,6 +100,8 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, materialImage }) {
     ;[1.02,3.88].forEach(y=>{const h=new THREE.Mesh(new THREE.BoxGeometry(4.35,.09,.12),frameMat);h.position.set(0,y,-3.08);windowFrame.add(h)})
     const mullion=new THREE.Mesh(new THREE.BoxGeometry(.045,2.65,.1),frameMat);mullion.position.set(0,2.45,-3.04);windowFrame.add(mullion)
     scene.add(windowFrame)
+    const curtainRod=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,4.9,20),mat('#806a4f',.32,.65))
+    curtainRod.rotation.z=Math.PI/2;curtainRod.position.set(0,3.94,-2.9);curtainRod.castShadow=true;scene.add(curtainRod)
 
     const makeFabricTexture = (hex, pattern='linen') => {
       const canvas=document.createElement('canvas');canvas.width=256;canvas.height=256
@@ -146,6 +148,12 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, materialImage }) {
           attribute.setXYZ(index,(u-.5)*width+Math.cos(phase)*preset.depth,(y/rows-.5)*height,Math.sin(phase)*preset.ripple)
         }
         attribute.needsUpdate=true;geo.computeVertexNormals()
+        mesh.children.forEach(child=>{if(child.userData.isEyelet)child.visible=styleId==='eyelet'})
+      }
+      const eyeletMaterial=new THREE.MeshStandardMaterial({color:'#9b805b',metalness:.78,roughness:.3})
+      for(let ring=0;ring<7;ring++){
+        const eyelet=new THREE.Mesh(new THREE.TorusGeometry(.052,.012,8,20),eyeletMaterial)
+        eyelet.position.set((ring/6-.5)*width,height/2-.045,.06);eyelet.userData.isEyelet=true;eyelet.visible=style==='eyelet';mesh.add(eyelet)
       }
       mesh.userData.applyStyle(style)
       curtainGroup.add(mesh);curtainMeshes.push(mesh)
