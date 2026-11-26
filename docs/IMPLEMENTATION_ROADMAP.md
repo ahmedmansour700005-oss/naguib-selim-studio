@@ -60,7 +60,8 @@ Customer-facing dimensions must remain in **centimeters (سم)** in every phase.
 - [ ] Clearly disclose any external paid API or service before adoption.
 
 ## Phase 6 — Customer project and studio handoff
-- [~] Basic local design save exists.
+- [x] Save the current design locally with fabric ID, curtain style, and all opening measurements.
+- [x] Restore the last saved design, including its catalog fabric and all room/window measurements.
 - [ ] Save multiple named projects and room/window configurations.
 - [ ] Generate a complete order summary with selected materials and cm measurements.
 - [~] WhatsApp message handoff prototype exists.
