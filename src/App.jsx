@@ -46,7 +46,7 @@ function PanoramaPreview({ panorama, roomName }) {
   }, [panorama?.src])
   return <div className="room-shell panorama-shell"><div className="room-top"><span>{roomName} · جولة 360° مصوّرة</span><span className="live-dot">{status === 'ready' ? 'البانوراما جاهزة' : status === 'error' ? 'تعذر التحميل' : 'جارٍ تحميل الصورة'}</span></div><div className="panorama-stage" ref={host} aria-label="جولة بانوراما 360 درجة">{status !== 'ready' && <div className="panorama-message">{status === 'error' ? error : 'جارٍ تحميل صورة الغرفة الأصلية…'}</div>}<div className="model-badge">360° · اسحب للتدوير واستخدم عجلة الماوس للتقريب</div></div><p className="panorama-note">هذه جولة مصوّرة من نقطة تصوير ثابتة؛ التنقل بين الغرف أو النقاط يتطلب صور بانوراما مرتبطة، وليست حركة حرة داخل مجسم ثلاثي الأبعاد.</p></div>
 }
-function RoomPreview({ fabric, style, open, setOpen, roomId, materialImage, upholsteryImage, upholstery, setUpholstery, materialScale, setMaterialScale, matchUpholsteryToCatalog, setMatchUpholsteryToCatalog }) {
+function RoomPreview({ fabric, style, open, setOpen, roomId, materialImage, upholsteryImage, upholstery, setUpholstery, materialScale, setMaterialScale, fabricOpacity, setFabricOpacity, matchUpholsteryToCatalog, setMatchUpholsteryToCatalog }) {
   const host = useRef(null)
   const sceneRef = useRef(null)
   const [ready, setReady] = useState(false)
@@ -245,9 +245,10 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, materialImage, upho
         state.sofaMat.map?.dispose();state.sofaMat.map=texture;state.sofaMat.needsUpdate=true
       },undefined,()=>{})
     }
+    state.curtainMat.opacity=fabricOpacity;state.curtainMat.transparent=fabricOpacity<.999;state.curtainMat.depthWrite=fabricOpacity>=.98;state.curtainMat.needsUpdate=true
     state.curtainMeshes.forEach(mesh=>{mesh.userData.targetX=open?mesh.userData.openX:mesh.userData.closedX;mesh.userData.applyStyle?.(style)})
     return ()=>{active=false}
-  },[fabric,upholstery,open,style,ready,materialImage,upholsteryImage,materialScale])
+  },[fabric,upholstery,open,style,ready,materialImage,upholsteryImage,materialScale,fabricOpacity])
 
   return <div className="room-shell model-shell">
     <div className="room-top"><span>{demoRooms.find(room=>room.id===roomId)?.name || 'استوديو ثلاثي الأبعاد'}</span><span className="live-dot">{ready?'3D تفاعلي جاهز · 360° يتطلب صور الغرف':'جارٍ تجهيز المشهد'}</span></div>
@@ -261,6 +262,7 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, materialImage, upho
       <div className="upholstery-picker"><span>تنجيد الأثاث</span>{['#b9a58b','#777f87','#53685a','#3d4654','#9a755b'].map(color=><button key={color} type="button" aria-label={'لون التنجيد '+color} className={upholstery===color?'active':''} style={{background:color}} onClick={()=>setUpholstery(color)}/>)}</div>
       <label className="upholstery-match"><input type="checkbox" checked={matchUpholsteryToCatalog} onChange={event=>setMatchUpholsteryToCatalog(event.target.checked)} disabled={!materialImage}/> استخدم صورة خامة الكتالوج للتنجيد أيضًا</label>
       <label className="texture-scale-control">مقياس نقشة القماش <input type="range" min="1" max="6" step="0.25" value={materialScale} onChange={event=>setMaterialScale(Number(event.target.value))}/><span>{materialScale.toFixed(2)}×</span></label>
+      <label className="texture-scale-control">شفافية الستارة <input type="range" min="0.35" max="1" step="0.05" value={fabricOpacity} onChange={event=>setFabricOpacity(Number(event.target.value))}/><span>{Math.round(fabricOpacity*100)}%</span></label>
     </div>
     <div className="preview-caption">مشهد 3D تجريبي مولّد داخل المتصفح؛ يمكن تدويره بحرية. {materialImage ? 'تم تطبيق صورة الخامة المختارة كنسيج بصري إرشادي على الستارة، وليست خريطة PBR معايرة أو محاكاة دقيقة لاتجاه النسيج والإضاءة.' : 'يُستخدم نسيج إجرائي مؤقت حتى اختيار خامة لها صورة موثقة.'} ليس تصويرًا فوتوغرافيًا أو جولة 360° ملتقطة.</div>
   </div>
@@ -275,6 +277,7 @@ export default function App() {
   const [matchUpholsteryToCatalog, setMatchUpholsteryToCatalog] = useState(false)
   const [upholstery, setUpholstery] = useState('#b9a58b')
   const [materialScale, setMaterialScale] = useState(2)
+  const [fabricOpacity, setFabricOpacity] = useState(0.92)
   const selectedCatalog = fabricCatalog.find(item => item.id === selectedCatalogId)
   const filteredCatalog = fabricCatalog.filter(item => item.name.toLocaleLowerCase().includes(catalogQuery.trim().toLocaleLowerCase())).slice(0, 80)
   const [style, setStyle] = useState('wave')
@@ -305,7 +308,7 @@ export default function App() {
   const openingEstimates = useMemo(() => openings.map(item => ({ ...item, ...calculateFabricRequirement(item, fabric.price) })), [openings, fabric, selectedCatalog])
   const estimate = openingEstimates.every(item => item.pricingAvailable) ? openingEstimates.reduce((sum, item) => sum + item.estimateEgp, 0) : null
   const saveDesign = () => {
-    const design = { roomId, roomName: activeRoom.name, viewMode, open, fabricId, fabric: fabric.name, catalogFabricId: selectedCatalogId || null, catalogFabric: selectedCatalog?.name || null, catalogSource: selectedCatalog?.sourceUrl || null, styleId: style, style: styles.find(s => s.id === style).name, upholstery, materialScale, matchUpholsteryToCatalog, openings, openingEstimates, estimate, pricingStatus: 'awaiting-approved-price-list', savedAt: new Date().toISOString() }
+    const design = { roomId, roomName: activeRoom.name, viewMode, open, fabricId, fabric: fabric.name, catalogFabricId: selectedCatalogId || null, catalogFabric: selectedCatalog?.name || null, catalogSource: selectedCatalog?.sourceUrl || null, styleId: style, style: styles.find(s => s.id === style).name, upholstery, materialScale, fabricOpacity, matchUpholsteryToCatalog, openings, openingEstimates, estimate, pricingStatus: 'awaiting-approved-price-list', savedAt: new Date().toISOString() }
     localStorage.setItem('nss-design', JSON.stringify(design))
     setSaved(true)
     setTimeout(() => setSaved(false), 3500)
@@ -323,6 +326,7 @@ export default function App() {
       setSelectedCatalogId(catalogId)
       setMatchUpholsteryToCatalog(Boolean(design.matchUpholsteryToCatalog))
       if (Number.isFinite(Number(design.materialScale))) setMaterialScale(Math.min(6, Math.max(1, Number(design.materialScale))))
+      if (Number.isFinite(Number(design.fabricOpacity))) setFabricOpacity(Math.min(1, Math.max(.35, Number(design.fabricOpacity))))
       if (['#b9a58b','#777f87','#53685a','#3d4654','#9a755b'].includes(design.upholstery)) setUpholstery(design.upholstery)
       if (styles.some(item => item.id === design.styleId)) setStyle(design.styleId)
       else if (design.style) setStyle(styles.find(item => item.name === design.style)?.id || 'wave')
@@ -424,7 +428,7 @@ export default function App() {
             </div>
             <div className="save-actions"><button className="save-btn" onClick={saveDesign}>{saved ? <><Check size={17}/> تم حفظ التصميم على جهازك</> : <>احفظ اختياراتي <ArrowLeft size={17}/></>}</button><button className="restore-btn" type="button" onClick={restoreDesign} disabled={!hasSavedDesign}>استرجاع آخر تصميم محفوظ</button></div>
           </div>
-          <div className="preview-column">{viewMode === "360" && viewingModes.panorama.available ? <PanoramaPreview panorama={activeRoom.panorama} roomName={activeRoom.name} /> : <RoomPreview fabric={fabric} style={style} open={open} setOpen={setOpen} roomId={roomId} materialImage={selectedCatalog?.imageUrl || null} upholsteryImage={matchUpholsteryToCatalog ? selectedCatalog?.imageUrl || null : null} upholstery={upholstery} setUpholstery={setUpholstery} materialScale={materialScale} setMaterialScale={setMaterialScale} matchUpholsteryToCatalog={matchUpholsteryToCatalog} setMatchUpholsteryToCatalog={setMatchUpholsteryToCatalog} />}</div>
+          <div className="preview-column">{viewMode === "360" && viewingModes.panorama.available ? <PanoramaPreview panorama={activeRoom.panorama} roomName={activeRoom.name} /> : <RoomPreview fabric={fabric} style={style} open={open} setOpen={setOpen} roomId={roomId} materialImage={selectedCatalog?.imageUrl || null} upholsteryImage={matchUpholsteryToCatalog ? selectedCatalog?.imageUrl || null : null} upholstery={upholstery} setUpholstery={setUpholstery} materialScale={materialScale} setMaterialScale={setMaterialScale} fabricOpacity={fabricOpacity} setFabricOpacity={setFabricOpacity} matchUpholsteryToCatalog={matchUpholsteryToCatalog} setMatchUpholsteryToCatalog={setMatchUpholsteryToCatalog} />}</div>
         </div>
       </section>
 
@@ -435,7 +439,7 @@ export default function App() {
 
       <section className="process" id="how"><div className="process-inner"><div><div className="eyebrow"><span/> من الفكرة للتنفيذ</div><h2>تفاصيلك تستحق<br/><em>اهتماماً خاصاً.</em></h2></div><div className="process-steps"><div><b>01</b><span><strong>اكتشف</strong><small>استكشف الخامات والتصميمات.</small></span></div><div><b>02</b><span><strong>خصّص</strong><small>اختار التفاصيل والمقاسات.</small></span></div><div><b>03</b><span><strong>تواصل</strong><small>ناقش اختيارك مع فريقنا.</small></span></div></div></div></section>
 
-      <section className="contact" id="contact"><div className="contact-copy"><div className="eyebrow dark"><span/> خطوتك التالية</div><h2>خلّينا نبدأ <em>حكاية جديدة.</em></h2><p>شاركنا بياناتك واختياراتك، وفريقنا يقدر يساعدك في الخطوة التالية.</p></div><form className="contact-form" onSubmit={e=>{e.preventDefault();const selectedStyle=styles.find(item=>item.id===style)?.name||style;const details=openings.map((item,index)=>{const calc=openingEstimates[index];return `• ${item.name} (${item.type==='balcony'?'بلكونة/باب جرار':'شباك'}): العرض ${item.widthCm} سم × الارتفاع ${item.heightCm} سم؛ زيادة أعلى ${item.topAllowanceCm} سم؛ ذيل ${item.bottomAllowanceCm} سم؛ فرق ميل ${item.slopeCm} سم؛ ثنيات ×${item.fullness}؛ طبقات ${item.layers}; بيت ستارة ${item.hasPelmet?'نعم، عمق '+item.pelmetDepthCm+' سم':'لا'}؛ استهلاك تقديري ${calc.valid?calc.fabricAreaM2.toFixed(2)+' م²':'يحتاج استكمال القياسات'}${item.notes?'؛ ملاحظات: '+item.notes:''}`}).join('\\n');const msg=[ 'طلب معاينة وتصميم — Naguib Selim Studio', 'الاسم: '+fullName, 'رقم التواصل: '+phone, 'الغرفة: '+activeRoom.name, 'الخامة: '+(selectedCatalog?.name||fabric.name), 'الموديل: '+selectedStyle, 'حالة الستارة: '+(open?'مفتوحة':'مغلقة'), 'تنجيد الأثاث: '+(matchUpholsteryToCatalog && selectedCatalog ? selectedCatalog.name+' (صورة مرجعية)' : upholstery), 'مقياس النقشة: '+materialScale+'×', 'الفتحات والمقاسات:', details, 'إجمالي استهلاك الخامات التقديري: '+(openingEstimates.every(item=>item.valid)?openingEstimates.reduce((sum,item)=>sum+item.fabricAreaM2,0).toFixed(2)+' م²':'غير مكتمل'), 'السعر النهائي: مطلوب تأكيده من المعرض بعد مراجعة وحدة البيع والمعاينة.', 'برجاء التواصل لتأكيد الخامات والمقاسات والتكلفة.' ].join('\\n');window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank','noopener,noreferrer')}}><label>الاسم<input required value={fullName} onChange={e=>setFullName(e.target.value)} placeholder="اكتب اسمك"/></label><label>رقم الهاتف<input required value={phone} onChange={e=>setPhone(e.target.value)} placeholder="01xxxxxxxxx" dir="ltr"/></label><button className="primary-btn" type="submit">تواصل عبر واتساب <ArrowLeft size={17}/></button><small>سيتم فتح واتساب برسالة جاهزة، ولن يتم إرسال بياناتك تلقائياً.</small></form></section>
+      <section className="contact" id="contact"><div className="contact-copy"><div className="eyebrow dark"><span/> خطوتك التالية</div><h2>خلّينا نبدأ <em>حكاية جديدة.</em></h2><p>شاركنا بياناتك واختياراتك، وفريقنا يقدر يساعدك في الخطوة التالية.</p></div><form className="contact-form" onSubmit={e=>{e.preventDefault();const selectedStyle=styles.find(item=>item.id===style)?.name||style;const details=openings.map((item,index)=>{const calc=openingEstimates[index];return `• ${item.name} (${item.type==='balcony'?'بلكونة/باب جرار':'شباك'}): العرض ${item.widthCm} سم × الارتفاع ${item.heightCm} سم؛ زيادة أعلى ${item.topAllowanceCm} سم؛ ذيل ${item.bottomAllowanceCm} سم؛ فرق ميل ${item.slopeCm} سم؛ ثنيات ×${item.fullness}؛ طبقات ${item.layers}; بيت ستارة ${item.hasPelmet?'نعم، عمق '+item.pelmetDepthCm+' سم':'لا'}؛ استهلاك تقديري ${calc.valid?calc.fabricAreaM2.toFixed(2)+' م²':'يحتاج استكمال القياسات'}${item.notes?'؛ ملاحظات: '+item.notes:''}`}).join('\\n');const msg=[ 'طلب معاينة وتصميم — Naguib Selim Studio', 'الاسم: '+fullName, 'رقم التواصل: '+phone, 'الغرفة: '+activeRoom.name, 'الخامة: '+(selectedCatalog?.name||fabric.name), 'الموديل: '+selectedStyle, 'حالة الستارة: '+(open?'مفتوحة':'مغلقة'), 'تنجيد الأثاث: '+(matchUpholsteryToCatalog && selectedCatalog ? selectedCatalog.name+' (صورة مرجعية)' : upholstery), 'مقياس النقشة: '+materialScale+'×', 'شفافية الستارة: '+Math.round(fabricOpacity*100)+'%', 'الفتحات والمقاسات:', details, 'إجمالي استهلاك الخامات التقديري: '+(openingEstimates.every(item=>item.valid)?openingEstimates.reduce((sum,item)=>sum+item.fabricAreaM2,0).toFixed(2)+' م²':'غير مكتمل'), 'السعر النهائي: مطلوب تأكيده من المعرض بعد مراجعة وحدة البيع والمعاينة.', 'برجاء التواصل لتأكيد الخامات والمقاسات والتكلفة.' ].join('\\n');window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank','noopener,noreferrer')}}><label>الاسم<input required value={fullName} onChange={e=>setFullName(e.target.value)} placeholder="اكتب اسمك"/></label><label>رقم الهاتف<input required value={phone} onChange={e=>setPhone(e.target.value)} placeholder="01xxxxxxxxx" dir="ltr"/></label><button className="primary-btn" type="submit">تواصل عبر واتساب <ArrowLeft size={17}/></button><small>سيتم فتح واتساب برسالة جاهزة، ولن يتم إرسال بياناتك تلقائياً.</small></form></section>
     </main>
     <footer><a className="brand footer-brand" href="#home"><span className="brand-mark">NS</span><span><b>NAGUIB SELIM</b><small>STUDIO · CURTAINS & FABRICS</small></span></a><span>© 2026 Naguib Selim Studio. جميع الحقوق محفوظة.</span><a href="#home">العودة للأعلى <ArrowDown size={14}/></a></footer>
   </div>
