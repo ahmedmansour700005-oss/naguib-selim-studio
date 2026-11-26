@@ -305,7 +305,7 @@ export default function App() {
   const openingEstimates = useMemo(() => openings.map(item => ({ ...item, ...calculateFabricRequirement(item, fabric.price) })), [openings, fabric, selectedCatalog])
   const estimate = openingEstimates.every(item => item.pricingAvailable) ? openingEstimates.reduce((sum, item) => sum + item.estimateEgp, 0) : null
   const saveDesign = () => {
-    const design = { roomId, roomName: activeRoom.name, fabricId, fabric: fabric.name, catalogFabricId: selectedCatalogId || null, catalogFabric: selectedCatalog?.name || null, catalogSource: selectedCatalog?.sourceUrl || null, styleId: style, style: styles.find(s => s.id === style).name, upholstery, materialScale, matchUpholsteryToCatalog, openings, openingEstimates, estimate, pricingStatus: 'awaiting-approved-price-list', savedAt: new Date().toISOString() }
+    const design = { roomId, roomName: activeRoom.name, viewMode, open, fabricId, fabric: fabric.name, catalogFabricId: selectedCatalogId || null, catalogFabric: selectedCatalog?.name || null, catalogSource: selectedCatalog?.sourceUrl || null, styleId: style, style: styles.find(s => s.id === style).name, upholstery, materialScale, matchUpholsteryToCatalog, openings, openingEstimates, estimate, pricingStatus: 'awaiting-approved-price-list', savedAt: new Date().toISOString() }
     localStorage.setItem('nss-design', JSON.stringify(design))
     setSaved(true)
     setTimeout(() => setSaved(false), 3500)
@@ -314,7 +314,9 @@ export default function App() {
     try {
       const design = JSON.parse(localStorage.getItem('nss-design') || 'null')
       if (!design || !Array.isArray(design.openings) || !design.openings.length) return
-      if (demoRooms.some(item => item.id === design.roomId)) setRoomId(design.roomId)
+      const restoredRoom = demoRooms.find(item => item.id === design.roomId)
+      if (restoredRoom) { setRoomId(design.roomId); setViewMode(design.viewMode === '360' && getRoomViewingModes(restoredRoom).panorama.available ? '360' : '3d') }
+      setOpen(Boolean(design.open))
       if (fabrics.some(item => item.id === design.fabricId)) setFabricId(design.fabricId)
       else if (design.fabric) setFabricId(fabrics.find(item => item.name === design.fabric)?.id || 'linen')
       const catalogId = design.catalogFabricId || fabricCatalog.find(item => item.name === design.catalogFabric)?.id || ''
