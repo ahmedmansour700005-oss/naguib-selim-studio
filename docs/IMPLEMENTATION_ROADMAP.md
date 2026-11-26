@@ -107,3 +107,12 @@ The deployed UI is an early React/CSS prototype. It has a stylized illustrative 
 - [x] GitHub Actions run for commit `9fe1cb0ddd4d3a06d2124a8813832eb00633c9d6` completed successfully (workflow run 73).
 - [ ] Confirm the Cloudflare Pages deployment for this commit and inspect the deployed page on desktop and mobile.
 - [ ] Align the remaining detailed configurator components with the Figma layout and verify the Arabic typography in browser.
+
+
+## Interactive 3D configurator milestone — 2026-11-26
+- [x] Replaced the external panorama-only preview with a browser-rendered Three.js room scene and OrbitControls (free orbit/zoom).
+- [x] Added procedural woven fabric textures applied to the curtain meshes and sofa upholstery material.
+- [x] Added curtain open/close control and independent sofa upholstery color swatches.
+- [x] Added a clear disclosure: this is a procedural 3D scene, not a photographic 360 panorama.
+- [ ] Verify the latest GitHub Actions build and test suite; confirm Cloudflare Pages deployment.
+- [ ] Replace the procedural room geometry/materials with authored high-detail room assets and product-specific fabric texture maps/masks for photorealistic fidelity.
