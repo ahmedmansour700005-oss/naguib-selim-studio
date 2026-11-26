@@ -29,3 +29,11 @@ test('two fabric layers double the required fabric area', () => {
   const double = calculateFabricRequirement({ widthCm: 200, heightCm: 200, fullness: 2, layers: 2 }, 600)
   assert.equal(double.fabricAreaM2, single.fabricAreaM2 * 2)
 })
+
+test('does not invent a price when no verified price list is supplied', () => {
+  const result = calculateFabricRequirement({ widthCm: 300, heightCm: 250, fullness: 2, layers: 2 }, null)
+  assert.equal(result.valid, true)
+  assert.equal(result.pricingAvailable, false)
+  assert.equal(result.estimateEgp, null)
+  assert.ok(result.fabricAreaM2 > 0)
+})
