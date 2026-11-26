@@ -80,11 +80,29 @@ export default function App() {
   const openingEstimates = useMemo(() => openings.map(item => ({ ...item, ...calculateFabricRequirement(item, fabric.price) })), [openings, fabric, selectedCatalog])
   const estimate = openingEstimates.reduce((sum, item) => sum + item.estimateEgp, 0)
   const saveDesign = () => {
-    const design = { fabric: fabric.name, catalogFabric: selectedCatalog?.name || null, catalogSource: selectedCatalog?.sourceUrl || null, style: styles.find(s => s.id === style).name, openings, openingEstimates, estimate, savedAt: new Date().toISOString() }
+    const design = { fabricId, fabric: fabric.name, catalogFabricId: selectedCatalogId || null, catalogFabric: selectedCatalog?.name || null, catalogSource: selectedCatalog?.sourceUrl || null, styleId: style, style: styles.find(s => s.id === style).name, openings, openingEstimates, estimate, savedAt: new Date().toISOString() }
     localStorage.setItem('nss-design', JSON.stringify(design))
     setSaved(true)
     setTimeout(() => setSaved(false), 3500)
   }
+  const restoreDesign = () => {
+    try {
+      const design = JSON.parse(localStorage.getItem('nss-design') || 'null')
+      if (!design || !Array.isArray(design.openings) || !design.openings.length) return
+      if (fabrics.some(item => item.id === design.fabricId)) setFabricId(design.fabricId)
+      else if (design.fabric) setFabricId(fabrics.find(item => item.name === design.fabric)?.id || 'linen')
+      const catalogId = design.catalogFabricId || fabricCatalog.find(item => item.name === design.catalogFabric)?.id || ''
+      setSelectedCatalogId(catalogId)
+      if (styles.some(item => item.id === design.styleId)) setStyle(design.styleId)
+      else if (design.style) setStyle(styles.find(item => item.name === design.style)?.id || 'wave')
+      setOpenings(design.openings)
+      setActiveOpeningId(design.openings[0].id)
+      setSaved(false)
+    } catch {
+      window.alert('تعذر قراءة التصميم المحفوظ. احفظ التصميم مرة أخرى من فضلك.')
+    }
+  }
+  const hasSavedDesign = Boolean(localStorage.getItem('nss-design'))
 
   return <div className="app">
     <header className="header">
@@ -173,7 +191,7 @@ export default function App() {
               <p className="estimate-note">الحساب استرشادي ويعتمد على معامل الثنيات والزيادات وعدد الطبقات وهالك تقديري. لا يُعد مقايسة نهائية قبل المعاينة وقياس الموقع.</p>
               <p className="estimate-note">أي قياس مستخرج من صورة أو كاميرا يظل تقديريًا حتى المعايرة والتأكيد البشري. جميع المدخلات بالسنتيمتر.</p>
             </div>
-            <button className="save-btn" onClick={saveDesign}>{saved ? <><Check size={17}/> تم حفظ التصميم على جهازك</> : <>احفظ اختياراتي <ArrowLeft size={17}/></>}</button>
+            <div className="save-actions"><button className="save-btn" onClick={saveDesign}>{saved ? <><Check size={17}/> تم حفظ التصميم على جهازك</> : <>احفظ اختياراتي <ArrowLeft size={17}/></>}</button><button className="restore-btn" type="button" onClick={restoreDesign} disabled={!hasSavedDesign}>استرجاع آخر تصميم محفوظ</button></div>
           </div>
           <div className="preview-column"><RoomPreview fabric={fabric} open={open} style={style} setOpen={setOpen}/></div>
         </div>
