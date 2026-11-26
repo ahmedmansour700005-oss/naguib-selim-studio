@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { calculateFabricRequirement } from './measurement.js'
 import { enrichedFabricCatalog as fabricCatalog } from './fabricCatalog.js'
 import { ArrowDown, ArrowLeft, Check, ChevronDown, Eye, Menu, Ruler, Sparkles, X } from 'lucide-react'
@@ -25,27 +25,61 @@ function Curtain({ color, open, style }) {
   </div>
 }
 
-function RoomPreview({ fabric, open, style, setOpen }) {
-  return <div className="room-shell">
-    <div className="room-top"><span>معاينة التصميم</span><span className="live-dot">معاينة مباشرة</span></div>
-    <div className="room-scene">
-      <div className="ceiling" />
-      <div className="wall">
-        <div className="wall-art"><div className="art-inner" /></div>
-        <div className="window">
-          <div className="window-glass"><div className="sky" /><div className="building b1" /><div className="building b2" /><div className="plant-silhouette" /></div>
-          <div className="window-frame" />
-          <div className="rod"><i /><i /></div>
-          <Curtain color={fabric.color} open={open} style={style} />
-        </div>
-        <div className="console"><div className="console-top" /><div className="console-body"><span /><span /><span /></div></div>
-        <div className="vase"><i /></div>
-        <div className="plant"><i /><i /><i /><b /></div>
-      </div>
-      <div className="floor"><div className="rug" /><div className="sofa"><div className="sofa-back" /><div className="sofa-seat" /><div className="sofa-arm left-arm" /><div className="sofa-arm right-arm" /><div className="cushion c1" /><div className="cushion c2" /></div><div className="table"><i /></div></div>
+function RoomPreview() {
+  const viewerHost = useRef(null)
+  const viewerInstance = useRef(null)
+  const [rotating, setRotating] = useState(true)
+  const [viewerReady, setViewerReady] = useState(false)
+
+  useEffect(() => {
+    if (!viewerHost.current || !window.pannellum) return
+    const viewer = window.pannellum.viewer(viewerHost.current, {
+      type: 'equirectangular',
+      panorama: 'https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/cayley_interior.jpg',
+      autoLoad: true,
+      autoRotate: -1.2,
+      compass: false,
+      showControls: true,
+      showFullscreenCtrl: true,
+      showZoomCtrl: true,
+      mouseZoom: true,
+      draggable: true,
+      hfov: 100,
+      minHfov: 45,
+      maxHfov: 120,
+      pitch: 0,
+      yaw: 0,
+      strings: { loadingLabel: 'جارٍ تحميل الغرفة…', loadButtonLabel: 'تحميل الجولة 360°' }
+    })
+    viewerInstance.current = viewer
+    viewer.on('load', () => setViewerReady(true))
+    viewer.on('error', () => setViewerReady(false))
+    return () => {
+      viewer.destroy()
+      viewerInstance.current = null
+    }
+  }, [])
+
+  const toggleRotation = () => {
+    const viewer = viewerInstance.current
+    if (!viewer) return
+    if (rotating) viewer.stopAutoRotate()
+    else viewer.startAutoRotate(-1.2)
+    setRotating(!rotating)
+  }
+
+  return <div className="room-shell panorama-shell">
+    <div className="room-top"><span>جولة الغرفة 360°</span><span className="live-dot">{viewerReady ? 'بانوراما جاهزة للدوران' : 'تحميل البانوراما'}</span></div>
+    <div className="room-scene panorama-scene">
+      <div ref={viewerHost} className="panorama-viewer" aria-label="جولة بانورامية 360 درجة للغرفة" />
+      {!viewerReady && <div className="panorama-loading">جارٍ تحميل صورة الغرفة البانورامية…</div>}
+      <div className="panorama-hint">اسحب بالماوس أو بإصبعك للدوران · استخدم عجلة الماوس أو القرص للتقريب</div>
     </div>
-    <button className="preview-toggle" onClick={() => setOpen(!open)}><Eye size={16}/>{open ? 'إغلاق الستائر' : 'فتح الستائر'}</button>
-    <div className="preview-caption">غرفة معيشة · تصميم توضيحي قابل للتخصيص</div>
+    <div className="panorama-actions">
+      <button type="button" className="preview-toggle" onClick={toggleRotation}>{rotating ? 'إيقاف الدوران التلقائي' : 'تشغيل الدوران التلقائي'}</button>
+      <a href="https://polyhaven.com/a/cayley_interior" target="_blank" rel="noreferrer">مصدر البانوراما · Poly Haven (CC0)</a>
+    </div>
+    <div className="preview-caption">بانوراما فوتوغرافية 360° من نقطة تصوير واحدة؛ ليست جولة 3D بحركة حرة.</div>
   </div>
 }
 
@@ -193,7 +227,7 @@ export default function App() {
             </div>
             <div className="save-actions"><button className="save-btn" onClick={saveDesign}>{saved ? <><Check size={17}/> تم حفظ التصميم على جهازك</> : <>احفظ اختياراتي <ArrowLeft size={17}/></>}</button><button className="restore-btn" type="button" onClick={restoreDesign} disabled={!hasSavedDesign}>استرجاع آخر تصميم محفوظ</button></div>
           </div>
-          <div className="preview-column"><RoomPreview fabric={fabric} open={open} style={style} setOpen={setOpen}/></div>
+          <div className="preview-column"><RoomPreview /></div>
         </div>
       </section>
 
