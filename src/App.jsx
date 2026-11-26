@@ -235,7 +235,7 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, opening, materialIm
     let frame=0
     const animate=()=>{frame=requestAnimationFrame(animate);curtainMeshes.forEach(mesh=>{if(Number.isFinite(mesh.userData.targetX))mesh.position.x+=(mesh.userData.targetX-mesh.position.x)*.12});controls.update();renderer.render(scene,camera)}
     animate()
-    sceneRef.current={THREE,scene,renderer,camera,controls,curtainMeshes,curtainMat,sofaMat,makeFabricTexture,windowFrame}
+    sceneRef.current={THREE,scene,renderer,camera,controls,curtainMeshes,curtainMat,sofaMat,makeFabricTexture,windowFrame,curtainRod}
     setReady(true)
     return ()=>{cancelAnimationFrame(frame);observer.disconnect();mount.removeEventListener('keydown',walk);mount.removeEventListener('pointerdown',focusScene);controls.dispose();renderer.dispose();scene.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>m.dispose())}});if(renderer.domElement.parentNode===mount)mount.removeChild(renderer.domElement);sceneRef.current=null;setReady(false)}
   }, [roomId])
@@ -272,7 +272,7 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, opening, materialIm
     const openingHeight=state.THREE.MathUtils.clamp(Number.isFinite(heightValue)&&heightValue>0?(heightValue+topAllowance+bottomAllowance)/100:3,1.2,3.8)
     const windowScaleY=openingHeight/2.65
     state.windowFrame.scale.set(openingWidth/4.15,windowScaleY,1);state.windowFrame.position.y=2.45-2.45*windowScaleY
-    const topY=2.45+1.43*windowScaleY;const fullness=state.THREE.MathUtils.clamp(Number(opening?.fullness)||2,1.2,3)
+    const topY=2.45+1.43*windowScaleY;state.curtainRod.scale.x=openingWidth/4.15;state.curtainRod.position.y=topY+.06;const fullness=state.THREE.MathUtils.clamp(Number(opening?.fullness)||2,1.2,3)
     state.curtainMeshes.forEach(mesh=>{
       mesh.scale.x=(openingWidth/2)/1.22;mesh.scale.y=openingHeight/2.95;mesh.position.y=topY-openingHeight/2
       mesh.userData.closedX=mesh.userData.side*openingWidth*.33;mesh.userData.openX=mesh.userData.side*(openingWidth/2+.48)
