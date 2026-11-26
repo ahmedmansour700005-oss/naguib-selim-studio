@@ -132,3 +132,15 @@ The deployed UI is an early React/CSS prototype. It has a stylized illustrative 
 - [ ] Replace procedural swatches with verified studio fabric scans/PBR maps and prepared curtain/upholstery masks.
 - [ ] Expand per-opening survey fields and revise fabric consumption against actual roll widths and studio rules.
 - [ ] Complete desktop/mobile/device rehearsal and verify Cloudflare deployment for the event release.
+
+
+## Execution update — 2026-11-26 (approved hybrid event demo)
+- [x] Confirmed the approved demo scope: mixed apartment (living room, bedroom, balcony), hybrid 360 + 3D architecture, live demo on Wednesday 2 December 2026.
+- [x] Added a strict scene-asset contract in `src/sceneAssets.js`: a panorama is eligible only when it has a valid HTTPS/local asset, equirectangular projection and 2:1 dimensions.
+- [x] Added automated tests for panorama readiness, viewing-mode disclosure and verified fabric-material requirements in `src/sceneAssets.test.js`.
+- [x] Added `docs/ASSET_PIPELINE.md` describing required capture, licensing, panorama, fabric PBR, curtain-state and upholstery assets.
+- [x] Added room-specific viewing-mode status to the configurator. The 3D mode is available; the 360 mode is explicitly marked as waiting for a real panorama asset.
+- [ ] Add and validate the actual living-room, bedroom and balcony panorama files; no 360 tour is claimed until then.
+- [ ] Implement and test the panorama viewer and linked viewpoint hotspots.
+- [ ] Replace procedural fabric samples with studio-approved PBR assets and calibrated curtain/upholstery zones.
+- [ ] Confirm CI result for the latest commits and verify the Cloudflare production deployment.
