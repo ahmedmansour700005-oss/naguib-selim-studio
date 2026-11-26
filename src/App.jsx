@@ -46,7 +46,7 @@ function PanoramaPreview({ panorama, roomName }) {
   }, [panorama?.src])
   return <div className="room-shell panorama-shell"><div className="room-top"><span>{roomName} · جولة 360° مصوّرة</span><span className="live-dot">{status === 'ready' ? 'البانوراما جاهزة' : status === 'error' ? 'تعذر التحميل' : 'جارٍ تحميل الصورة'}</span></div><div className="panorama-stage" ref={host} aria-label="جولة بانوراما 360 درجة">{status !== 'ready' && <div className="panorama-message">{status === 'error' ? error : 'جارٍ تحميل صورة الغرفة الأصلية…'}</div>}<div className="model-badge">360° · اسحب للتدوير واستخدم عجلة الماوس للتقريب</div></div><p className="panorama-note">هذه جولة مصوّرة من نقطة تصوير ثابتة؛ التنقل بين الغرف أو النقاط يتطلب صور بانوراما مرتبطة، وليست حركة حرة داخل مجسم ثلاثي الأبعاد.</p></div>
 }
-function RoomPreview({ fabric, style, open, setOpen, roomId, materialImage, upholsteryImage, upholstery, setUpholstery, materialScale, setMaterialScale, fabricOpacity, setFabricOpacity, matchUpholsteryToCatalog, setMatchUpholsteryToCatalog }) {
+function RoomPreview({ fabric, style, open, setOpen, roomId, opening, materialImage, upholsteryImage, upholstery, setUpholstery, materialScale, setMaterialScale, fabricOpacity, setFabricOpacity, matchUpholsteryToCatalog, setMatchUpholsteryToCatalog }) {
   const host = useRef(null)
   const sceneRef = useRef(null)
   const [ready, setReady] = useState(false)
@@ -138,12 +138,12 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, materialImage, upho
       geo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3))
       geo.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));geo.setIndex(indices);geo.computeVertexNormals()
       const mesh=new THREE.Mesh(geo,curtainMat);mesh.castShadow=true;mesh.receiveShadow=true
-      mesh.position.set(side*1.35,2.42,-2.94);mesh.userData.closedX=side*1.35;mesh.userData.openX=side*2.25
-      mesh.userData.applyStyle=(styleId='wave')=>{
+      mesh.position.set(side*1.35,2.42,-2.94);mesh.userData.side=side;mesh.userData.closedX=side*1.35;mesh.userData.openX=side*2.25
+      mesh.userData.applyStyle=(styleId='wave',fullness=2)=>{
         const presets={wave:{count:18,depth:.075,ripple:.045},classic:{count:24,depth:.105,ripple:.065},eyelet:{count:10,depth:.045,ripple:.025}}
-        const preset=presets[styleId]||presets.wave;const attribute=geo.attributes.position
+        const preset=presets[styleId]||presets.wave;const foldCount=Math.max(8,Math.round(preset.count*fullness/2));const attribute=geo.attributes.position
         for(let y=0;y<=rows;y++)for(let x=0;x<=segments;x++){
-          const u=x/segments;const index=y*(segments+1)+x;const phase=u*Math.PI*preset.count
+          const u=x/segments;const index=y*(segments+1)+x;const phase=u*Math.PI*foldCount
           attribute.setXYZ(index,(u-.5)*width+Math.cos(phase)*preset.depth,(y/rows-.5)*height,Math.sin(phase)*preset.ripple)
         }
         attribute.needsUpdate=true;geo.computeVertexNormals()
@@ -235,7 +235,7 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, materialImage, upho
     let frame=0
     const animate=()=>{frame=requestAnimationFrame(animate);curtainMeshes.forEach(mesh=>{if(Number.isFinite(mesh.userData.targetX))mesh.position.x+=(mesh.userData.targetX-mesh.position.x)*.12});controls.update();renderer.render(scene,camera)}
     animate()
-    sceneRef.current={THREE,scene,renderer,camera,controls,curtainMeshes,curtainMat,sofaMat,makeFabricTexture}
+    sceneRef.current={THREE,scene,renderer,camera,controls,curtainMeshes,curtainMat,sofaMat,makeFabricTexture,windowFrame}
     setReady(true)
     return ()=>{cancelAnimationFrame(frame);observer.disconnect();mount.removeEventListener('keydown',walk);mount.removeEventListener('pointerdown',focusScene);controls.dispose();renderer.dispose();scene.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>m.dispose())}});if(renderer.domElement.parentNode===mount)mount.removeChild(renderer.domElement);sceneRef.current=null;setReady(false)}
   }, [roomId])
@@ -266,9 +266,20 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, materialImage, upho
       },undefined,()=>{})
     }
     state.curtainMat.opacity=fabricOpacity;state.curtainMat.transparent=fabricOpacity<.999;state.curtainMat.depthWrite=fabricOpacity>=.98;state.curtainMat.needsUpdate=true
-    state.curtainMeshes.forEach(mesh=>{mesh.userData.targetX=open?mesh.userData.openX:mesh.userData.closedX;mesh.userData.applyStyle?.(style)})
+    const widthValue=Number.parseFloat(opening?.widthCm);const heightValue=Number.parseFloat(opening?.heightCm)
+    const topAllowance=Number.parseFloat(opening?.topAllowanceCm)||0;const bottomAllowance=Number.parseFloat(opening?.bottomAllowanceCm)||0
+    const openingWidth=state.THREE.MathUtils.clamp(Number.isFinite(widthValue)&&widthValue>0?widthValue/100:3,1.2,4.8)
+    const openingHeight=state.THREE.MathUtils.clamp(Number.isFinite(heightValue)&&heightValue>0?(heightValue+topAllowance+bottomAllowance)/100:3,1.2,3.8)
+    const windowScaleY=openingHeight/2.65
+    state.windowFrame.scale.set(openingWidth/4.15,windowScaleY,1);state.windowFrame.position.y=2.45-2.45*windowScaleY
+    const topY=2.45+1.43*windowScaleY;const fullness=state.THREE.MathUtils.clamp(Number(opening?.fullness)||2,1.2,3)
+    state.curtainMeshes.forEach(mesh=>{
+      mesh.scale.x=(openingWidth/2)/1.22;mesh.scale.y=openingHeight/2.95;mesh.position.y=topY-openingHeight/2
+      mesh.userData.closedX=mesh.userData.side*openingWidth*.33;mesh.userData.openX=mesh.userData.side*(openingWidth/2+.48)
+      mesh.userData.targetX=open?mesh.userData.openX:mesh.userData.closedX;mesh.userData.applyStyle?.(style,fullness)
+    })
     return ()=>{active=false}
-  },[fabric,upholstery,open,style,ready,materialImage,upholsteryImage,materialScale,fabricOpacity])
+  },[fabric,upholstery,open,style,ready,materialImage,upholsteryImage,materialScale,fabricOpacity,opening?.widthCm,opening?.heightCm,opening?.topAllowanceCm,opening?.bottomAllowanceCm,opening?.fullness])
 
   return <div className="room-shell model-shell">
     <div className="room-top"><span>{demoRooms.find(room=>room.id===roomId)?.name || 'استوديو ثلاثي الأبعاد'}</span><span className="live-dot">{ready?'3D تفاعلي جاهز · 360° يتطلب صور الغرف':'جارٍ تجهيز المشهد'}</span></div>
@@ -448,7 +459,7 @@ export default function App() {
             </div>
             <div className="save-actions"><button className="save-btn" onClick={saveDesign}>{saved ? <><Check size={17}/> تم حفظ التصميم على جهازك</> : <>احفظ اختياراتي <ArrowLeft size={17}/></>}</button><button className="restore-btn" type="button" onClick={restoreDesign} disabled={!hasSavedDesign}>استرجاع آخر تصميم محفوظ</button></div>
           </div>
-          <div className="preview-column">{viewMode === "360" && viewingModes.panorama.available ? <PanoramaPreview panorama={activeRoom.panorama} roomName={activeRoom.name} /> : <RoomPreview fabric={fabric} style={style} open={open} setOpen={setOpen} roomId={roomId} materialImage={selectedCatalog?.imageUrl || null} upholsteryImage={matchUpholsteryToCatalog ? selectedCatalog?.imageUrl || null : null} upholstery={upholstery} setUpholstery={setUpholstery} materialScale={materialScale} setMaterialScale={setMaterialScale} fabricOpacity={fabricOpacity} setFabricOpacity={setFabricOpacity} matchUpholsteryToCatalog={matchUpholsteryToCatalog} setMatchUpholsteryToCatalog={setMatchUpholsteryToCatalog} />}</div>
+          <div className="preview-column">{viewMode === "360" && viewingModes.panorama.available ? <PanoramaPreview panorama={activeRoom.panorama} roomName={activeRoom.name} /> : <RoomPreview fabric={fabric} style={style} open={open} setOpen={setOpen} roomId={roomId} opening={activeOpening} materialImage={selectedCatalog?.imageUrl || null} upholsteryImage={matchUpholsteryToCatalog ? selectedCatalog?.imageUrl || null : null} upholstery={upholstery} setUpholstery={setUpholstery} materialScale={materialScale} setMaterialScale={setMaterialScale} fabricOpacity={fabricOpacity} setFabricOpacity={setFabricOpacity} matchUpholsteryToCatalog={matchUpholsteryToCatalog} setMatchUpholsteryToCatalog={setMatchUpholsteryToCatalog} />}</div>
         </div>
       </section>
 
