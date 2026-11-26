@@ -32,7 +32,8 @@ export function calculateFabricRequirement(opening, pricePerSquareMeter, wasteFa
     valid: true,
     dropCm,
     fabricAreaM2,
-    estimateEgp: Math.round(fabricAreaM2 * price * 1.8),
+    estimateEgp: Number.isFinite(Number(pricePerSquareMeter)) && pricePerSquareMeter !== null && pricePerSquareMeter !== '' ? Math.round(fabricAreaM2 * price * 1.8) : null,
+    pricingAvailable: Number.isFinite(Number(pricePerSquareMeter)) && pricePerSquareMeter !== null && pricePerSquareMeter !== '',
     assumptions: { fullness, layers, wasteFactor, pricingMultiplier: 1.8 }
   }
 }
