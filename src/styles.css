@@ -30,3 +30,7 @@
 .catalog-selected a{color:#806744;text-decoration:underline}
 .catalog-selected img{width:100%;max-width:220px;max-height:150px;object-fit:cover;border-radius:8px}.catalog-selected small{flex-basis:100%;color:#777064;line-height:1.6;font-size:11px}
 @media(max-width:600px){.catalog-results{grid-template-columns:repeat(2,minmax(0,1fr))}.catalog-picker{padding:12px}}
+
+
+/* Saved design recovery actions */
+.save-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.restore-btn{border:1px solid #b8aa91;background:transparent;color:#5e503b;padding:14px 16px;font:inherit;font-size:12px;cursor:pointer;transition:background .2s,color .2s}.restore-btn:hover:not(:disabled){background:#eee8de}.restore-btn:disabled{opacity:.45;cursor:not-allowed}@media(max-width:650px){.save-actions{grid-template-columns:1fr}.restore-btn{padding:13px}}
