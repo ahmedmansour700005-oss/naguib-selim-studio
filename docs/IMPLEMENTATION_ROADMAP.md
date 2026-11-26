@@ -15,7 +15,7 @@ Customer-facing dimensions must remain in **centimeters (سم)** in every phase.
 - [x] Measurement helper converts centimeters to meters only at calculation boundaries.
 - [x] Existing width and height inputs are labeled in centimeters.
 - [x] GitHub Actions workflow added to install dependencies and run the production build on pushes and pull requests.
-- [ ] Confirm the first GitHub Actions run is green.
+- [x] Confirm GitHub Actions run 129 for commit `cfbf639be2dc7d03252e22e040ae193138f63f1c` is green (tests and production build passed).
 - [ ] Add a lockfile and switch CI to reproducible `npm ci`.
 
 ## Phase 1 — Measurement and quotation foundation
@@ -32,8 +32,8 @@ Customer-facing dimensions must remain in **centimeters (سم)** in every phase.
 ## Phase 2 — Real 360 room experience
 - [ ] Obtain or capture licensed, real 360 room panoramas.
 - [ ] Define room, panorama, hotspot and viewpoint data format.
-- [ ] Add panorama viewer with look-around, zoom and viewpoint hotspots.
-- [ ] Add multiple rooms and linked viewpoint navigation.
+- [~] Panorama viewer supports look-around and zoom; interactive hotspots are not implemented.
+- [~] Room-specific panorama uploads and viewpoint buttons are implemented; actual room panoramas and hotspot-linked transitions are still missing.
 - [ ] Test mobile performance and supported VR headset viewing.
 - [ ] Do not describe panorama navigation as unrestricted 3D walking.
 
@@ -70,7 +70,7 @@ Customer-facing dimensions must remain in **centimeters (سم)** in every phase.
 
 ## Phase 7 — Quality, release and operations
 - [x] Automated production build workflow added.
-- [ ] Green CI build verified.
+- [x] GitHub Actions run 129: dependency install, all Node tests, and production build completed successfully.
 - [~] Unit tests for conversion, invalid dimensions, allowances, fullness and layers added; UI interaction tests remain.
 - [ ] Accessibility and responsive checks.
 - [ ] Performance tests on ordinary mobile devices.
@@ -78,7 +78,7 @@ Customer-facing dimensions must remain in **centimeters (سم)** in every phase.
 - [ ] Maintain this roadmap with verified status only.
 
 ## Current honest baseline
-The deployed UI is an early React/CSS prototype. It has a stylized illustrative room, a small fabric/style sample, basic open/close interaction, a single width/height form in cm, an indicative estimate, local save, and a WhatsApp message draft. It does **not** yet provide real 360 photography, VR tour, photorealistic material replacement, full multi-window measurement, upholstery compositing, AI voice consultant, or animated sales guide.
+The repository contains a React/Vite prototype with three configurable room presets, a separate procedural 3D scene, a 360 panorama viewer that accepts user-supplied 2:1 images and switches between uploaded viewpoints, fabric catalog/search, per-opening cm measurements and indicative consumption, local save/restore, and a WhatsApp draft. The latest GitHub Actions test/build run is green. The repository still does **not** include licensed real room panoramas, photorealistic product-specific fabric replacement with masks/PBR maps, a complete upholstery compositing pipeline, a production AI voice consultant, or a verified Cloudflare live deployment.
 
 
 ## Mandatory technical truth and measurement accuracy gate
@@ -144,3 +144,12 @@ The deployed UI is an early React/CSS prototype. It has a stylized illustrative 
 - [ ] Implement and test the panorama viewer and linked viewpoint hotspots.
 - [ ] Replace procedural fabric samples with studio-approved PBR assets and calibrated curtain/upholstery zones.
 - [ ] Confirm CI result for the latest commits and verify the Cloudflare production deployment.
+
+
+## Verification update — 2026-11-26 (latest main commit)
+- [x] GitHub Actions run [45847402794](https://github.com/ahmedmansour700005-oss/naguib-selim-studio/actions/runs/45847402794) for commit `cfbf639be2dc7d03252e22e040ae193138f63f1c` completed successfully.
+- [x] The workflow completed dependency installation, `npm test` (Node test suite), and `npm run build` (Vite production build).
+- [x] The panorama viewer and per-room multi-view upload/navigation controls are present in `src/App.jsx`.
+- [~] Uploaded panoramas are browser-session blob URLs; they are not persisted to a server or across reloads.
+- [ ] Actual licensed room panoramas, clickable spatial hotspots, and mobile/VR acceptance testing remain outstanding.
+- [ ] Cloudflare Pages live deployment remains unverified; a green GitHub build is not proof of a successful live deployment.
