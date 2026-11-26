@@ -136,8 +136,8 @@ function RoomPreview({ fabric, style, open, setOpen, roomId }) {
         const pillow=new THREE.Mesh(new THREE.BoxGeometry(.88,.2,.62),cushionMat)
         pillow.position.set(x, .78, .18);pillow.castShadow=true;sofa.add(pillow)
       }
-      const throw=new THREE.Mesh(new THREE.BoxGeometry(1.35,.06,1.15),cushionMat)
-      throw.position.set(.48,.7,1.28);sofa.add(throw)
+      const bedThrow=new THREE.Mesh(new THREE.BoxGeometry(1.35,.06,1.15),cushionMat)
+      bedThrow.position.set(.48,.7,1.28);sofa.add(bedThrow)
     } else if(roomId === 'balcony'){
       for(const x of [-1.25,1.25]){
         addSofaBox(.95,.18,.9,x,.62,.75,sofaMat)
