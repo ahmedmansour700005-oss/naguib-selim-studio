@@ -97,6 +97,16 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, opening, materialIm
     windowWallParts.right.scale.set(initialSideWidth,6,1);windowWallParts.right.position.set(4.15/2+initialSideWidth/2,3,-3.2)
     windowWallParts.top.scale.set(4.15,2.225,1);windowWallParts.top.position.y=4.8875
     windowWallParts.bottom.scale.set(4.15,1.125,1);windowWallParts.bottom.position.y=.5625
+    const outsideSky=new THREE.Mesh(new THREE.PlaneGeometry(12,6),new THREE.MeshBasicMaterial({color:roomId==='balcony'?'#a8c7d4':'#c5d5d7'}))
+    outsideSky.position.set(0,3,-3.42);scene.add(outsideSky)
+    const outsideGround=new THREE.Mesh(new THREE.PlaneGeometry(12,1.5),new THREE.MeshBasicMaterial({color:'#8b9b80'}))
+    outsideGround.position.set(0,.48,-3.4);scene.add(outsideGround)
+    if(roomId==='balcony'){
+      const railMaterial=mat('#6d7774',.42,.7)
+      const railTop=new THREE.Mesh(new THREE.BoxGeometry(4.3,.055,.07),railMaterial);railTop.position.set(0,1.18,-3.62);scene.add(railTop)
+      const railBottom=new THREE.Mesh(new THREE.BoxGeometry(4.3,.055,.07),railMaterial);railBottom.position.set(0,.2,-3.62);scene.add(railBottom)
+      for(const x of [-2.08,0,2.08]){const post=new THREE.Mesh(new THREE.BoxGeometry(.055,1.0,.07),railMaterial);post.position.set(x,.69,-3.62);scene.add(post)}
+    }
     const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(6.5,6),mat('#d8cbbb'))
     leftWall.rotation.y=Math.PI/2; leftWall.position.set(-6,3,0); scene.add(leftWall)
     const rightWall = new THREE.Mesh(new THREE.PlaneGeometry(6.5,6),mat('#d8cbbb'))
@@ -316,20 +326,21 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, opening, materialIm
     const openingWidth=state.THREE.MathUtils.clamp(Number.isFinite(widthValue)&&widthValue>0?widthValue/100:3,1.2,4.8)
     const openingHeight=state.THREE.MathUtils.clamp(Number.isFinite(heightValue)&&heightValue>0?(heightValue+topAllowance+bottomAllowance)/100:3,1.2,3.8)
     const windowScaleY=openingHeight/2.65
-    state.windowFrame.scale.set(openingWidth/4.15,windowScaleY,1);state.windowFrame.position.y=2.45-2.45*windowScaleY
-    const wallSideWidth=(12-openingWidth)/2;const wallTopY=2.45+openingHeight/2;const wallBottomY=2.45-openingHeight/2
+    const windowCenterY=roomId==='balcony'?openingHeight/2+.12:2.45
+    state.windowFrame.scale.set(openingWidth/4.15,windowScaleY,1);state.windowFrame.position.y=windowCenterY-2.45*windowScaleY
+    const wallSideWidth=(12-openingWidth)/2;const wallTopY=windowCenterY+openingHeight/2;const wallBottomY=windowCenterY-openingHeight/2
     state.windowWallParts.left.scale.set(wallSideWidth,6,1);state.windowWallParts.left.position.x=-(openingWidth/2+wallSideWidth/2)
     state.windowWallParts.right.scale.set(wallSideWidth,6,1);state.windowWallParts.right.position.x=openingWidth/2+wallSideWidth/2
     state.windowWallParts.top.scale.set(openingWidth,Math.max(.05,6-wallTopY),1);state.windowWallParts.top.position.y=(6+wallTopY)/2
     state.windowWallParts.bottom.scale.set(openingWidth,Math.max(.05,wallBottomY),1);state.windowWallParts.bottom.position.y=wallBottomY/2
-    const topY=2.45+1.43*windowScaleY;state.curtainRod.scale.x=openingWidth/4.15;state.curtainRod.position.y=topY+.06;const fullness=state.THREE.MathUtils.clamp(Number(opening?.fullness)||2,1.2,3)
+    const topY=windowCenterY+openingHeight/2+.14;state.curtainRod.scale.x=openingWidth/4.15;state.curtainRod.position.y=topY;const fullness=state.THREE.MathUtils.clamp(Number(opening?.fullness)||2,1.2,3)
     state.curtainMeshes.forEach(mesh=>{
       mesh.scale.x=(openingWidth/2)/1.22;mesh.scale.y=openingHeight/2.95;mesh.position.y=topY-openingHeight/2
       mesh.userData.closedX=mesh.userData.side*openingWidth*.33;mesh.userData.openX=mesh.userData.side*(openingWidth/2+.48)
       mesh.userData.targetX=open?mesh.userData.openX:mesh.userData.closedX;mesh.userData.applyStyle?.(style,fullness)
     })
     return ()=>{active=false}
-  },[fabric,upholstery,open,style,ready,materialImage,upholsteryImage,materialScale,fabricOpacity,opening?.widthCm,opening?.heightCm,opening?.topAllowanceCm,opening?.bottomAllowanceCm,opening?.fullness])
+  },[fabric,upholstery,open,style,ready,roomId,materialImage,upholsteryImage,materialScale,fabricOpacity,opening?.widthCm,opening?.heightCm,opening?.topAllowanceCm,opening?.bottomAllowanceCm,opening?.fullness])
 
   return <div className="room-shell model-shell">
     <div className="room-top"><span>{demoRooms.find(room=>room.id===roomId)?.name || 'استوديو ثلاثي الأبعاد'}</span><span className="live-dot">{ready?'3D تفاعلي جاهز · 360° يتطلب صور الغرف':'جارٍ تجهيز المشهد'}</span></div>
