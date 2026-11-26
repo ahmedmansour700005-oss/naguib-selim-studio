@@ -116,3 +116,19 @@ The deployed UI is an early React/CSS prototype. It has a stylized illustrative 
 - [x] Added a clear disclosure: this is a procedural 3D scene, not a photographic 360 panorama.
 - [ ] Verify the latest GitHub Actions build and test suite; confirm Cloudflare Pages deployment.
 - [ ] Replace the procedural room geometry/materials with authored high-detail room assets and product-specific fabric texture maps/masks for photorealistic fidelity.
+
+
+## Event demo — approved scope (2 December 2026)
+- [x] Approved mixed apartment demo: living room, bedroom, and balcony.
+- [x] Approved hybrid target architecture: photographic 360° tour for captured viewpoints plus separate free-orbit 3D configurator.
+- [x] Approved event goal: live working demonstration.
+- [x] Added `docs/EVENT_DEMO_PLAN.md` with delivery gates, asset requirements, daily plan and acceptance criteria.
+- [x] Added `src/demoRooms.js` with three room presets and three budget-aware design directions.
+- [x] Added room selector that changes the actual 3D room composition (living sofa, bedroom bed, balcony seating).
+- [x] Added Essential / Smart Elegance / Luxury Signature presets that apply fabric, curtain style, fullness and layer settings.
+- [~] Existing 3D scene supports orbit/zoom, curtain open/close, procedural curtain texture and upholstery material changes; still a geometry prototype, not photorealistic.
+- [ ] Capture or obtain licensed 2:1 equirectangular panoramas for all three rooms; do not mark 360 mode complete until these assets are integrated.
+- [ ] Add 360 viewer and linked viewpoint navigation, distinct from free-walk 3D.
+- [ ] Replace procedural swatches with verified studio fabric scans/PBR maps and prepared curtain/upholstery masks.
+- [ ] Expand per-opening survey fields and revise fabric consumption against actual roll widths and studio rules.
+- [ ] Complete desktop/mobile/device rehearsal and verify Cloudflare deployment for the event release.
