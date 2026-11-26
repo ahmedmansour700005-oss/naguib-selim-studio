@@ -34,3 +34,52 @@
 
 /* Saved design recovery actions */
 .save-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.restore-btn{border:1px solid #b8aa91;background:transparent;color:#5e503b;padding:14px 16px;font:inherit;font-size:12px;cursor:pointer;transition:background .2s,color .2s}.restore-btn:hover:not(:disabled){background:#eee8de}.restore-btn:disabled{opacity:.45;cursor:not-allowed}@media(max-width:650px){.save-actions{grid-template-columns:1fr}.restore-btn{padding:13px}}
+
+
+/* Modern Luxury refresh — aligned with the approved Figma direction */
+:root{color:#292a27;background:#f8f6f0}
+body{background:#f8f6f0;color:#292a27}
+.header{background:#f8f6f0;border-bottom:1px solid #e9e4d9}
+.brand-mark{border-color:#9a7954;color:#8c6945}
+.nav{color:#5f5c55}
+.nav a:hover,.header-cta:hover{color:#8c6945}
+.header-cta{border-color:#a78359}
+.hero{background:#f1ede4;color:#292a27;min-height:570px}
+.eyebrow{color:#8a704f}
+.eyebrow span{background:#a78359}
+.hero h1 em{color:#98744d}
+.hero-copy p{color:#68665e}
+.primary-btn{background:#96734d;color:#fffaf1}
+.primary-btn:hover{background:#7e603f}
+.hero-note{color:#777268}
+.hero-image{box-shadow:0 24px 55px #4a3d2b22}
+.hero-stamp{background:#fbf9f4;color:#292a27}
+.hero-stamp b{color:#98744d}
+.studio-section{background:#f8f6f0}
+.section-heading h2 em{color:#98744d}
+.step{color:#98744d}
+.controls{background:#fffefa;border:1px solid #e9e4da;box-shadow:0 16px 44px #3027190b}
+.fabric-option.selected,.style-option.selected{border-color:#a78359;background:#f4efe6}
+.swatch{box-shadow:inset 0 0 12px #00000012}
+.style-option{background:#fbfaf7;border-color:#ece7dd}
+.style-option.selected{background:#f4efe6}
+.style-check{color:#98744d}
+.save-btn{background:#292a27;color:#fffaf1}
+.save-btn:hover{background:#48443d}
+.restore-btn{border-color:#bca98e;color:#6c563a}
+.restore-btn:hover:not(:disabled){background:#f1eadf}
+.room-shell{background:#e8e1d4}
+.room-scene{background:#d1c9b9}
+.preview-toggle{background:#292a27}
+.collections{background:#eee9df}
+.collection-card{background:#fbf9f4}
+.process{background:#292a27}
+.process-steps>div>b{color:#c2a47b}
+.contact{background:#f8f6f0}
+footer{background:#eee9df;color:#716b60}
+@media(max-width:650px){
+ .nav{background:#f8f6f0}
+ .hero{background:#f1ede4}
+ .controls{border:1px solid #e9e4da}
+ .room-shell{background:#e8e1d4}
+}
