@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { calculateFabricRequirement } from './measurement.js'
 import { enrichedFabricCatalog as fabricCatalog } from './fabricCatalog.js'
 import { demoRooms, designDirections } from './demoRooms.js'
+import { getRoomViewingModes } from './sceneAssets.js'
 import { ArrowDown, ArrowLeft, Check, ChevronDown, Eye, Menu, Ruler, Sparkles, X } from 'lucide-react'
 
 const fabrics = [
@@ -220,6 +221,7 @@ export default function App() {
   const [open, setOpen] = useState(false)
   const [openings, setOpenings] = useState(demoRooms[0].openings)
   const activeRoom = demoRooms.find(room => room.id === roomId) || demoRooms[0]
+  const viewingModes = getRoomViewingModes(activeRoom)
   const changeRoom = id => { const room = demoRooms.find(item => item.id === id); if (!room) return; setRoomId(id); setOpenings(room.openings.map(item => ({...item}))); setActiveOpeningId(room.openings[0].id) }
   const [activeOpeningId, setActiveOpeningId] = useState(1)
   const activeOpening = openings.find(item => item.id === activeOpeningId) || openings[0]
@@ -300,7 +302,7 @@ export default function App() {
 
       <section className="studio-section" id="studio">
         <div className="section-heading"><div><div className="eyebrow dark"><span/> مساحة التجربة</div><h2>صمّمها كما <em>تتخيّلها</em></h2></div><p>غيّر الخامة والستايل، وعاين النتيجة فوراً. اختياراتك محفوظة على جهازك.</p></div>
-        <div className="design-directions"><div className="directions-heading"><b>3 اتجاهات تصميم مقترحة</b><small>اختار مستوى يناسب ذوقك وميزانيتك؛ الأسعار النهائية تعتمد على تسعير المعرض</small></div><div className="direction-cards">{designDirections.map(direction=><button type="button" key={direction.id} className="direction-card" onClick={()=>{setFabricId(direction.fabricId);setSelectedCatalogId('');setStyle(direction.styleId);setOpenings(items=>items.map(item=>({...item,layers:String(direction.layers),fullness:String(direction.fullness)})))}}><span>{direction.tier}</span><b>{direction.name}</b><small>{direction.description}</small><em>جرّب التصميم</em></button>)}</div></div><div className="demo-room-switcher" aria-label="اختيار غرفة العرض"><div><b>اختر مساحة التجربة</b><small>شقة تجريبية متنوعة · Living / Bedroom / Balcony</small></div><div className="demo-room-buttons">{demoRooms.map(room=><button type="button" key={room.id} className={roomId===room.id?'active':''} onClick={()=>changeRoom(room.id)}>{room.name}</button>)}</div></div><div className="configurator">
+        <div className="design-directions"><div className="directions-heading"><b>3 اتجاهات تصميم مقترحة</b><small>اختار مستوى يناسب ذوقك وميزانيتك؛ الأسعار النهائية تعتمد على تسعير المعرض</small></div><div className="direction-cards">{designDirections.map(direction=><button type="button" key={direction.id} className="direction-card" onClick={()=>{setFabricId(direction.fabricId);setSelectedCatalogId('');setStyle(direction.styleId);setOpenings(items=>items.map(item=>({...item,layers:String(direction.layers),fullness:String(direction.fullness)})))}}><span>{direction.tier}</span><b>{direction.name}</b><small>{direction.description}</small><em>جرّب التصميم</em></button>)}</div></div><div className="demo-room-switcher" aria-label="اختيار غرفة العرض"><div><b>اختر مساحة التجربة</b><small>شقة تجريبية متنوعة · Living / Bedroom / Balcony</small></div><div className="demo-room-buttons">{demoRooms.map(room=><button type="button" key={room.id} className={roomId===room.id?'active':''} onClick={()=>changeRoom(room.id)}>{room.name}</button>)}</div></div><div className="view-mode-status" aria-label="حالة أوضاع المعاينة"><div className="view-mode-card active"><b>{viewingModes.model3d.label}</b><small>{viewingModes.model3d.description}</small><span>متاح الآن</span></div><div className="view-mode-card unavailable" aria-disabled="true"><b>{viewingModes.panorama.label}</b><small>{viewingModes.panorama.description}</small><span>لن يتاح قبل إضافة بانوراما أصلية مرخصة لهذه الغرفة</span></div></div><div className="configurator">
           <div className="controls">
             <div className="control-block">
               <div className="control-title"><span className="step">01</span><div><h3>اختر الخامة</h3><small>FABRIC COLLECTION</small></div></div>
