@@ -27,6 +27,25 @@ function Curtain({ color, open, style }) {
   </div>
 }
 
+function PanoramaPreview({ panorama, roomName }) {
+  const host = useRef(null); const [status, setStatus] = useState('loading'); const [error, setError] = useState('')
+  useEffect(() => {
+    const THREE = window.THREE; const mount = host.current
+    if (!mount || !THREE || !THREE.OrbitControls || !panorama?.src) { setStatus('unavailable'); return }
+    let renderer, controls, observer, frame, texture
+    const scene = new THREE.Scene(); const camera = new THREE.PerspectiveCamera(72, mount.clientWidth / mount.clientHeight, 0.1, 1100); camera.position.set(0, 0, 0.1)
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); renderer.setSize(mount.clientWidth, mount.clientHeight); renderer.outputEncoding = THREE.sRGBEncoding; mount.appendChild(renderer.domElement)
+      const geometry = new THREE.SphereGeometry(500, 72, 48); geometry.scale(-1, 1, 1); const material = new THREE.MeshBasicMaterial({ color: 0xffffff }); scene.add(new THREE.Mesh(geometry, material))
+      controls = new THREE.OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.dampingFactor = 0.055; controls.enablePan = false; controls.minDistance = 0.1; controls.maxDistance = 0.1; controls.minPolarAngle = 0.01; controls.maxPolarAngle = Math.PI - 0.01; controls.rotateSpeed = -0.28
+      const loader = new THREE.TextureLoader(); loader.setCrossOrigin('anonymous'); loader.load(panorama.src, loaded => { texture = loaded; texture.encoding = THREE.sRGBEncoding; material.map = texture; material.needsUpdate = true; setStatus('ready') }, undefined, () => { setError('تعذر تحميل صورة البانوراما. تأكد من الرابط وإعدادات CORS.'); setStatus('error') })
+      const resize = () => { if (!mount.clientWidth || !mount.clientHeight) return; camera.aspect = mount.clientWidth / mount.clientHeight; camera.updateProjectionMatrix(); renderer.setSize(mount.clientWidth, mount.clientHeight) }; observer = new ResizeObserver(resize); observer.observe(mount)
+      const animate = () => { frame = requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera) }; animate()
+    } catch { setError('المتصفح لم يتمكن من تشغيل عارض 360° على هذا الجهاز.'); setStatus('error') }
+    return () => { cancelAnimationFrame(frame); observer?.disconnect(); controls?.dispose(); texture?.dispose(); scene.traverse(object => { object.geometry?.dispose(); if (object.material) object.material.dispose() }); renderer?.dispose(); if (renderer?.domElement?.parentNode === mount) mount.removeChild(renderer.domElement) }
+  }, [panorama?.src])
+  return <div className="room-shell panorama-shell"><div className="room-top"><span>{roomName} · جولة 360° مصوّرة</span><span className="live-dot">{status === 'ready' ? 'البانوراما جاهزة' : status === 'error' ? 'تعذر التحميل' : 'جارٍ تحميل الصورة'}</span></div><div className="panorama-stage" ref={host} aria-label="جولة بانوراما 360 درجة">{status !== 'ready' && <div className="panorama-message">{status === 'error' ? error : 'جارٍ تحميل صورة الغرفة الأصلية…'}</div>}<div className="model-badge">360° · اسحب للتدوير واستخدم عجلة الماوس للتقريب</div></div><p className="panorama-note">هذه جولة مصوّرة من نقطة تصوير ثابتة؛ التنقل بين الغرف أو النقاط يتطلب صور بانوراما مرتبطة، وليست حركة حرة داخل مجسم ثلاثي الأبعاد.</p></div>
+}
 function RoomPreview({ fabric, style, open, setOpen, roomId }) {
   const host = useRef(null)
   const sceneRef = useRef(null)
@@ -212,6 +231,7 @@ function RoomPreview({ fabric, style, open, setOpen, roomId }) {
 
 export default function App() {
   const [roomId, setRoomId] = useState('living')
+  const [viewMode, setViewMode] = useState('3d')
   const [fabricId, setFabricId] = useState('linen')
   const [catalogQuery, setCatalogQuery] = useState('')
   const [selectedCatalogId, setSelectedCatalogId] = useState('')
@@ -222,7 +242,7 @@ export default function App() {
   const [openings, setOpenings] = useState(demoRooms[0].openings)
   const activeRoom = demoRooms.find(room => room.id === roomId) || demoRooms[0]
   const viewingModes = getRoomViewingModes(activeRoom)
-  const changeRoom = id => { const room = demoRooms.find(item => item.id === id); if (!room) return; setRoomId(id); setOpenings(room.openings.map(item => ({...item}))); setActiveOpeningId(room.openings[0].id) }
+  const changeRoom = id => { const room = demoRooms.find(item => item.id === id); if (!room) return; setRoomId(id); setViewMode('3d'); setOpenings(room.openings.map(item => ({...item}))); setActiveOpeningId(room.openings[0].id) }
   const [activeOpeningId, setActiveOpeningId] = useState(1)
   const activeOpening = openings.find(item => item.id === activeOpeningId) || openings[0]
   const updateOpening = (field, value) => setOpenings(items => items.map(item => item.id === activeOpeningId ? { ...item, [field]: value } : item))
@@ -302,7 +322,7 @@ export default function App() {
 
       <section className="studio-section" id="studio">
         <div className="section-heading"><div><div className="eyebrow dark"><span/> مساحة التجربة</div><h2>صمّمها كما <em>تتخيّلها</em></h2></div><p>غيّر الخامة والستايل، وعاين النتيجة فوراً. اختياراتك محفوظة على جهازك.</p></div>
-        <div className="design-directions"><div className="directions-heading"><b>3 اتجاهات تصميم مقترحة</b><small>اختار مستوى يناسب ذوقك وميزانيتك؛ الأسعار النهائية تعتمد على تسعير المعرض</small></div><div className="direction-cards">{designDirections.map(direction=><button type="button" key={direction.id} className="direction-card" onClick={()=>{setFabricId(direction.fabricId);setSelectedCatalogId('');setStyle(direction.styleId);setOpenings(items=>items.map(item=>({...item,layers:String(direction.layers),fullness:String(direction.fullness)})))}}><span>{direction.tier}</span><b>{direction.name}</b><small>{direction.description}</small><em>جرّب التصميم</em></button>)}</div></div><div className="demo-room-switcher" aria-label="اختيار غرفة العرض"><div><b>اختر مساحة التجربة</b><small>شقة تجريبية متنوعة · Living / Bedroom / Balcony</small></div><div className="demo-room-buttons">{demoRooms.map(room=><button type="button" key={room.id} className={roomId===room.id?'active':''} onClick={()=>changeRoom(room.id)}>{room.name}</button>)}</div></div><div className="view-mode-status" aria-label="حالة أوضاع المعاينة"><div className="view-mode-card active"><b>{viewingModes.model3d.label}</b><small>{viewingModes.model3d.description}</small><span>متاح الآن</span></div><div className="view-mode-card unavailable" aria-disabled="true"><b>{viewingModes.panorama.label}</b><small>{viewingModes.panorama.description}</small><span>لن يتاح قبل إضافة بانوراما أصلية مرخصة لهذه الغرفة</span></div></div><div className="configurator">
+        <div className="design-directions"><div className="directions-heading"><b>3 اتجاهات تصميم مقترحة</b><small>اختار مستوى يناسب ذوقك وميزانيتك؛ الأسعار النهائية تعتمد على تسعير المعرض</small></div><div className="direction-cards">{designDirections.map(direction=><button type="button" key={direction.id} className="direction-card" onClick={()=>{setFabricId(direction.fabricId);setSelectedCatalogId('');setStyle(direction.styleId);setOpenings(items=>items.map(item=>({...item,layers:String(direction.layers),fullness:String(direction.fullness)})))}}><span>{direction.tier}</span><b>{direction.name}</b><small>{direction.description}</small><em>جرّب التصميم</em></button>)}</div></div><div className="demo-room-switcher" aria-label="اختيار غرفة العرض"><div><b>اختر مساحة التجربة</b><small>شقة تجريبية متنوعة · Living / Bedroom / Balcony</small></div><div className="demo-room-buttons">{demoRooms.map(room=><button type="button" key={room.id} className={roomId===room.id?'active':''} onClick={()=>changeRoom(room.id)}>{room.name}</button>)}</div></div><div className="view-mode-status" aria-label="حالة أوضاع المعاينة"><button type="button" className={viewMode === "3d" ? "view-mode-card active" : "view-mode-card"} onClick={() => setViewMode("3d")}><b>{viewingModes.model3d.label}</b><small>{viewingModes.model3d.description}</small><span>متاح الآن</span></button><button type="button" className={viewingModes.panorama.available ? (viewMode === "360" ? "view-mode-card active" : "view-mode-card") : "view-mode-card unavailable"} disabled={!viewingModes.panorama.available} onClick={() => setViewMode("360")}><b>{viewingModes.panorama.label}</b><small>{viewingModes.panorama.description}</small><span>{viewingModes.panorama.available ? "افتح الجولة المصوّرة" : "بانوراما أصلية مرخصة غير مضافة بعد"}</span></button></div><div className="configurator">
           <div className="controls">
             <div className="control-block">
               <div className="control-title"><span className="step">01</span><div><h3>اختر الخامة</h3><small>FABRIC COLLECTION</small></div></div>
@@ -316,7 +336,7 @@ export default function App() {
                 <small>تمت إضافة {fabricCatalog.length} اسم/كود بعد إزالة التكرارات. اكتب أي اسم أو كود للبحث؛ نعرض أول 80 نتيجة مطابقة في كل مرة. لا نعرض سعراً أو صورة كبيانات مؤكدة إلا بعد التحقق من مصدرها.</small>
                 {selectedCatalog && <div className="catalog-selected"><b>الخامة المختارة: {selectedCatalog.name}</b><a href={selectedCatalog.sourceUrl} target="_blank" rel="noreferrer">{selectedCatalog.sourceUrl.includes('/products/') ? 'صفحة المنتج الرسمية' : 'ابحث في الموقع الرسمي'}</a>{selectedCatalog.alternateSourceUrl && <a href={selectedCatalog.alternateSourceUrl} target="_blank" rel="noreferrer">النسخة الأخرى من الخامة</a>}{selectedCatalog.alternateSourceUrl2 && <a href={selectedCatalog.alternateSourceUrl2} target="_blank" rel="noreferrer">النسخة الثالثة من الخامة</a>}{selectedCatalog.alternateSourceUrl2 && <a href={selectedCatalog.alternateSourceUrl2} target="_blank" rel="noreferrer">نسخة إضافية من الخامة</a>}{selectedCatalog.imageUrl && <img src={selectedCatalog.imageUrl} alt={selectedCatalog.name} />}<small>{selectedCatalog.note ? `${selectedCatalog.note} ` : ''}{selectedCatalog.imageUrl ? 'الصورة مرجع فقط ولا تطبق نسيجاً واقعياً على الستارة في المعاينة الحالية.' : 'لا توجد صورة رسمية موثقة لهذه الخامة حتى الآن؛ يمكنك فتح بحث الموقع الرسمي.'}</small></div>}
               </div>
-              <div className="fabric-detail"><span className="detail-dot" style={{background:fabric.color}}/><span>{selectedCatalog ? selectedCatalog.name : fabric.en}</span><b>{selectedCatalog ? (selectedCatalog.priceEgp ? `${selectedCatalog.priceEgp.toLocaleString('en-US')} ج.م · سعر مرصود يحتاج تأكيد وحدة البيع` : 'السعر ووحدة البيع: يلزم تأكيد من المعرض') : `${fabric.price.toLocaleString('en-US')} ج.م / م² · سعر تجريبي`}</b></div>
+              <div className="fabric-detail"><span className="detail-dot" style={{background:fabric.color}}/><span>{selectedCatalog ? selectedCatalog.name : fabric.en}</span><b>{selectedCatalog ? (selectedCatalog.priceEgp ? `${selectedCatalog.priceEgp.toLocaleString('en-US')} ج.م · سعر مرصود يحتاج تأكيد وحدة البيع` : 'السعر ووحدة البيع: يلزم تأكيد من المعرض') : 'السعر ووحدة البيع: يلزم تأكيد من المعرض'}</b></div>
             </div>
             <div className="control-block">
               <div className="control-title"><span className="step">02</span><div><h3>اختار شكل الستارة</h3><small>CURTAIN STYLE</small></div></div>
@@ -359,7 +379,7 @@ export default function App() {
             </div>
             <div className="save-actions"><button className="save-btn" onClick={saveDesign}>{saved ? <><Check size={17}/> تم حفظ التصميم على جهازك</> : <>احفظ اختياراتي <ArrowLeft size={17}/></>}</button><button className="restore-btn" type="button" onClick={restoreDesign} disabled={!hasSavedDesign}>استرجاع آخر تصميم محفوظ</button></div>
           </div>
-          <div className="preview-column"><RoomPreview fabric={fabric} style={style} open={open} setOpen={setOpen} roomId={roomId} /></div>
+          <div className="preview-column">{viewMode === "360" && viewingModes.panorama.available ? <PanoramaPreview panorama={activeRoom.panorama} roomName={activeRoom.name} /> : <RoomPreview fabric={fabric} style={style} open={open} setOpen={setOpen} roomId={roomId} />}</div>
         </div>
       </section>
 
