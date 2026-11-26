@@ -295,7 +295,7 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, opening, materialIm
       <label className="texture-scale-control">مقياس نقشة القماش <input type="range" min="1" max="6" step="0.25" value={materialScale} onChange={event=>setMaterialScale(Number(event.target.value))}/><span>{materialScale.toFixed(2)}×</span></label>
       <label className="texture-scale-control">شفافية الستارة <input type="range" min="0.35" max="1" step="0.05" value={fabricOpacity} onChange={event=>setFabricOpacity(Number(event.target.value))}/><span>{Math.round(fabricOpacity*100)}%</span></label>
     </div>
-    <div className="preview-caption">مشهد 3D تجريبي مولّد داخل المتصفح؛ يمكن تدويره، وبعد النقر عليه التحرك داخل حدود الغرفة بمفاتيح W A S D. {materialImage ? 'تم تطبيق صورة الخامة المختارة كنسيج بصري إرشادي على الستارة، وليست خريطة PBR معايرة أو محاكاة دقيقة لاتجاه النسيج والإضاءة.' : 'يُستخدم نسيج إجرائي مؤقت حتى اختيار خامة لها صورة موثقة.'} ليس تصويرًا فوتوغرافيًا أو جولة 360° ملتقطة.</div>
+    <div className="preview-caption">مشهد 3D تجريبي مولّد داخل المتصفح؛ يمكن تدويره، وبعد النقر عليه التحرك داخل حدود الغرفة بمفاتيح W A S D. {materialImage ? 'تم تطبيق صورة الخامة المختارة كنسيج بصري إرشادي على الستارة، وليست خريطة PBR معايرة أو محاكاة دقيقة لاتجاه النسيج والإضاءة.' : 'يُستخدم نسيج إجرائي مؤقت حتى اختيار خامة لها صورة موثقة.'} أبعاد الشباك والستارة تتغير حسب قياسات الفتحة النشطة بالسم، كمعاينة تقريبية وليست رسماً تنفيذياً معتمداً. ليس تصويرًا فوتوغرافيًا أو جولة 360° ملتقطة.</div>
   </div>
 }
 
