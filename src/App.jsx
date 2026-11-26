@@ -125,8 +125,7 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, materialImage }) {
         const v=y/rows
         for(let x=0;x<=segments;x++){
           const u=x/segments
-          const pleat=Math.cos(u*Math.PI*18)*.075
-          positions.push((u-.5)*width+pleat, (v-.5)*height, Math.sin(u*Math.PI*18)*.045)
+          positions.push((u-.5)*width, (v-.5)*height, 0)
           uvs.push(u*2,v*2)
         }
       }
@@ -139,6 +138,16 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, materialImage }) {
       geo.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));geo.setIndex(indices);geo.computeVertexNormals()
       const mesh=new THREE.Mesh(geo,curtainMat);mesh.castShadow=true;mesh.receiveShadow=true
       mesh.position.set(side*1.35,2.42,-2.94);mesh.userData.closedX=side*1.35;mesh.userData.openX=side*2.25
+      mesh.userData.applyStyle=(styleId='wave')=>{
+        const presets={wave:{count:18,depth:.075,ripple:.045},classic:{count:24,depth:.105,ripple:.065},eyelet:{count:10,depth:.045,ripple:.025}}
+        const preset=presets[styleId]||presets.wave;const attribute=geo.attributes.position
+        for(let y=0;y<=rows;y++)for(let x=0;x<=segments;x++){
+          const u=x/segments;const index=y*(segments+1)+x;const phase=u*Math.PI*preset.count
+          attribute.setXYZ(index,(u-.5)*width+Math.cos(phase)*preset.depth,(y/rows-.5)*height,Math.sin(phase)*preset.ripple)
+        }
+        attribute.needsUpdate=true;geo.computeVertexNormals()
+      }
+      mesh.userData.applyStyle(style)
       curtainGroup.add(mesh);curtainMeshes.push(mesh)
     }
     createCurtainPanel(-1);createCurtainPanel(1);scene.add(curtainGroup)
@@ -221,7 +230,7 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, materialImage }) {
     }
     const sofaTexture=state.makeFabricTexture(upholstery,'woven')
     state.sofaMat.map?.dispose();state.sofaMat.map=sofaTexture;state.sofaMat.needsUpdate=true
-    state.curtainMeshes.forEach(mesh=>{mesh.position.x=open?mesh.userData.openX:mesh.userData.closedX})
+    state.curtainMeshes.forEach(mesh=>{mesh.position.x=open?mesh.userData.openX:mesh.userData.closedX;mesh.userData.applyStyle?.(style)})
     return ()=>{active=false}
   },[fabric,upholstery,open,style,ready,materialImage])
 
