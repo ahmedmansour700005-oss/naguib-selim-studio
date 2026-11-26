@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { calculateFabricRequirement } from './measurement.js'
 import { enrichedFabricCatalog as fabricCatalog } from './fabricCatalog.js'
+import { demoRooms, designDirections } from './demoRooms.js'
 import { ArrowDown, ArrowLeft, Check, ChevronDown, Eye, Menu, Ruler, Sparkles, X } from 'lucide-react'
 
 const fabrics = [
@@ -25,7 +26,7 @@ function Curtain({ color, open, style }) {
   </div>
 }
 
-function RoomPreview({ fabric, style, open, setOpen }) {
+function RoomPreview({ fabric, style, open, setOpen, roomId }) {
   const host = useRef(null)
   const sceneRef = useRef(null)
   const [ready, setReady] = useState(false)
@@ -36,8 +37,9 @@ function RoomPreview({ fabric, style, open, setOpen }) {
     if (!host.current || !THREE || !THREE.OrbitControls) return
     const mount = host.current
     const scene = new THREE.Scene()
-    scene.background = new THREE.Color('#d9d1c4')
-    scene.fog = new THREE.Fog('#d9d1c4', 13, 28)
+    const roomTone = roomId === 'bedroom' ? '#d8d2cb' : roomId === 'balcony' ? '#d6dfd9' : '#d9d1c4'
+    scene.background = new THREE.Color(roomTone)
+    scene.fog = new THREE.Fog(roomTone, 13, 28)
     const camera = new THREE.PerspectiveCamera(48, mount.clientWidth / mount.clientHeight, 0.1, 100)
     camera.position.set(0, 3.1, 8.8)
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false })
@@ -126,16 +128,34 @@ function RoomPreview({ fabric, style, open, setOpen }) {
       const geometry=round?new THREE.BoxGeometry(w,h,d,4,2,4):new THREE.BoxGeometry(w,h,d)
       const mesh=new THREE.Mesh(geometry,material);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;sofa.add(mesh);return mesh
     }
-    addSofaBox(3.55,.42,1.12,0,.58,.35,sofaMat)
-    addSofaBox(3.5,1.05,.34,0,1.18,-.16,sofaMat)
-    addSofaBox(.42,.88,1.05,-1.78,.86,.38,sofaMat)
-    addSofaBox(.42,.88,1.05,1.78,.86,.38,sofaMat)
     const cushionMat=new THREE.MeshStandardMaterial({map:makeFabricTexture('#d7c9b4','woven'),roughness:1})
-    for(let x=-1.15;x<=1.16;x+=1.15){
-      const cushion=new THREE.Mesh(new THREE.BoxGeometry(1.02,.22,.72),cushionMat)
-      cushion.position.set(x,.9,.28);cushion.rotation.x=-.08;cushion.castShadow=true;sofa.add(cushion)
-      const back=new THREE.Mesh(new THREE.BoxGeometry(1.02,.72,.24),cushionMat)
-      back.position.set(x,1.48,-.03);back.castShadow=true;sofa.add(back)
+    if(roomId === 'bedroom'){
+      addSofaBox(2.65,.38,2.15,0,.48,1.0,sofaMat)
+      addSofaBox(2.7,.48,.28,0,.88,-.02,sofaMat)
+      for(let x=-.72;x<=.73;x+=1.44){
+        const pillow=new THREE.Mesh(new THREE.BoxGeometry(.88,.2,.62),cushionMat)
+        pillow.position.set(x, .78, .18);pillow.castShadow=true;sofa.add(pillow)
+      }
+      const throw=new THREE.Mesh(new THREE.BoxGeometry(1.35,.06,1.15),cushionMat)
+      throw.position.set(.48,.7,1.28);sofa.add(throw)
+    } else if(roomId === 'balcony'){
+      for(const x of [-1.25,1.25]){
+        addSofaBox(.95,.18,.9,x,.62,.75,sofaMat)
+        addSofaBox(.95,.82,.18,x,1.02,.32,sofaMat)
+        addSofaBox(.14,.58,.72,x-.38,.78,.7,sofaMat)
+        addSofaBox(.14,.58,.72,x+.38,.78,.7,sofaMat)
+      }
+    } else {
+      addSofaBox(3.55,.42,1.12,0,.58,.35,sofaMat)
+      addSofaBox(3.5,1.05,.34,0,1.18,-.16,sofaMat)
+      addSofaBox(.42,.88,1.05,-1.78,.86,.38,sofaMat)
+      addSofaBox(.42,.88,1.05,1.78,.86,.38,sofaMat)
+      for(let x=-1.15;x<=1.16;x+=1.15){
+        const cushion=new THREE.Mesh(new THREE.BoxGeometry(1.02,.22,.72),cushionMat)
+        cushion.position.set(x,.9,.28);cushion.rotation.x=-.08;cushion.castShadow=true;sofa.add(cushion)
+        const back=new THREE.Mesh(new THREE.BoxGeometry(1.02,.72,.24),cushionMat)
+        back.position.set(x,1.48,-.03);back.castShadow=true;sofa.add(back)
+      }
     }
     sofa.position.z=1.25;scene.add(sofa)
 
@@ -162,7 +182,7 @@ function RoomPreview({ fabric, style, open, setOpen }) {
     sceneRef.current={scene,renderer,camera,controls,curtainMeshes,curtainMat,sofaMat,makeFabricTexture}
     setReady(true)
     return ()=>{cancelAnimationFrame(frame);observer.disconnect();controls.dispose();renderer.dispose();scene.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>m.dispose())}});if(renderer.domElement.parentNode===mount)mount.removeChild(renderer.domElement);sceneRef.current=null;setReady(false)}
-  }, [])
+  }, [roomId])
 
   useEffect(()=>{
     const state=sceneRef.current;if(!state)return
@@ -175,7 +195,7 @@ function RoomPreview({ fabric, style, open, setOpen }) {
   },[fabric,upholstery,open,style,ready])
 
   return <div className="room-shell model-shell">
-    <div className="room-top"><span>استوديو ثلاثي الأبعاد تفاعلي</span><span className="live-dot">{ready?'المشهد ثلاثي الأبعاد جاهز':'جارٍ تجهيز المشهد'}</span></div>
+    <div className="room-top"><span>{demoRooms.find(room=>room.id===roomId)?.name || 'استوديو ثلاثي الأبعاد'}</span><span className="live-dot">{ready?'المشهد ثلاثي الأبعاد جاهز':'جارٍ تجهيز المشهد'}</span></div>
     <div className="model-stage" ref={host} aria-label="غرفة ثلاثية الأبعاد قابلة للدوران وتخصيص الأقمشة">
       {!ready&&<div className="model-loading">جارٍ تحميل الاستوديو ثلاثي الأبعاد…</div>}
       <div className="model-badge">3D · تحريك وتدوير بالماوس أو اللمس</div>
@@ -183,13 +203,14 @@ function RoomPreview({ fabric, style, open, setOpen }) {
     <div className="model-tools">
       <button type="button" className="preview-toggle" onClick={()=>setOpen(!open)}>{open?'إغلاق الستائر':'فتح الستائر'}</button>
       <span>خامة الستارة: {fabric?.name||'كتان طبيعي'}</span>
-      <div className="upholstery-picker"><span>تنجيد الكنبة</span>{['#b9a58b','#777f87','#53685a','#3d4654','#9a755b'].map(color=><button key={color} type="button" aria-label={'لون التنجيد '+color} className={upholstery===color?'active':''} style={{background:color}} onClick={()=>setUpholstery(color)}/>)}</div>
+      <div className="upholstery-picker"><span>تنجيد الأثاث</span>{['#b9a58b','#777f87','#53685a','#3d4654','#9a755b'].map(color=><button key={color} type="button" aria-label={'لون التنجيد '+color} className={upholstery===color?'active':''} style={{background:color}} onClick={()=>setUpholstery(color)}/>)}</div>
     </div>
-    <div className="preview-caption">مشهد 3D مولّد هندسيًا داخل المتصفح؛ يمكن تدويره بحرية وتغيير خامة الستارة والتنجيد، وليس تصويرًا فوتوغرافيًا أو بانوراما 360°.</div>
+    <div className="preview-caption">مشهد 3D تجريبي مولّد داخل المتصفح؛ يمكن تدويره بحرية. ليس تصويرًا فوتوغرافيًا أو جولة 360° ملتقطة. صور الغرف الحقيقية ستُربط بعد تجهيز أصول التصوير.</div>
   </div>
 }
 
 export default function App() {
+  const [roomId, setRoomId] = useState('living')
   const [fabricId, setFabricId] = useState('linen')
   const [catalogQuery, setCatalogQuery] = useState('')
   const [selectedCatalogId, setSelectedCatalogId] = useState('')
@@ -197,7 +218,9 @@ export default function App() {
   const filteredCatalog = fabricCatalog.filter(item => item.name.toLocaleLowerCase().includes(catalogQuery.trim().toLocaleLowerCase())).slice(0, 80)
   const [style, setStyle] = useState('wave')
   const [open, setOpen] = useState(false)
-  const [openings, setOpenings] = useState([{ id: 1, name: 'شباك غرفة المعيشة', type: 'window', widthCm: '300', heightCm: '270', hasPelmet: false, pelmetDepthCm: '15', slopeCm: '0', topAllowanceCm: '20', bottomAllowanceCm: '20', fullness: '2', layers: '1', notes: '' }])
+  const [openings, setOpenings] = useState(demoRooms[0].openings)
+  const activeRoom = demoRooms.find(room => room.id === roomId) || demoRooms[0]
+  const changeRoom = id => { const room = demoRooms.find(item => item.id === id); if (!room) return; setRoomId(id); setOpenings(room.openings.map(item => ({...item}))); setActiveOpeningId(room.openings[0].id) }
   const [activeOpeningId, setActiveOpeningId] = useState(1)
   const activeOpening = openings.find(item => item.id === activeOpeningId) || openings[0]
   const updateOpening = (field, value) => setOpenings(items => items.map(item => item.id === activeOpeningId ? { ...item, [field]: value } : item))
@@ -220,7 +243,7 @@ export default function App() {
   const openingEstimates = useMemo(() => openings.map(item => ({ ...item, ...calculateFabricRequirement(item, fabric.price) })), [openings, fabric, selectedCatalog])
   const estimate = openingEstimates.reduce((sum, item) => sum + item.estimateEgp, 0)
   const saveDesign = () => {
-    const design = { fabricId, fabric: fabric.name, catalogFabricId: selectedCatalogId || null, catalogFabric: selectedCatalog?.name || null, catalogSource: selectedCatalog?.sourceUrl || null, styleId: style, style: styles.find(s => s.id === style).name, openings, openingEstimates, estimate, savedAt: new Date().toISOString() }
+    const design = { roomId, roomName: activeRoom.name, fabricId, fabric: fabric.name, catalogFabricId: selectedCatalogId || null, catalogFabric: selectedCatalog?.name || null, catalogSource: selectedCatalog?.sourceUrl || null, styleId: style, style: styles.find(s => s.id === style).name, openings, openingEstimates, estimate, savedAt: new Date().toISOString() }
     localStorage.setItem('nss-design', JSON.stringify(design))
     setSaved(true)
     setTimeout(() => setSaved(false), 3500)
@@ -229,6 +252,7 @@ export default function App() {
     try {
       const design = JSON.parse(localStorage.getItem('nss-design') || 'null')
       if (!design || !Array.isArray(design.openings) || !design.openings.length) return
+      if (demoRooms.some(item => item.id === design.roomId)) setRoomId(design.roomId)
       if (fabrics.some(item => item.id === design.fabricId)) setFabricId(design.fabricId)
       else if (design.fabric) setFabricId(fabrics.find(item => item.name === design.fabric)?.id || 'linen')
       const catalogId = design.catalogFabricId || fabricCatalog.find(item => item.name === design.catalogFabric)?.id || ''
@@ -276,7 +300,7 @@ export default function App() {
 
       <section className="studio-section" id="studio">
         <div className="section-heading"><div><div className="eyebrow dark"><span/> مساحة التجربة</div><h2>صمّمها كما <em>تتخيّلها</em></h2></div><p>غيّر الخامة والستايل، وعاين النتيجة فوراً. اختياراتك محفوظة على جهازك.</p></div>
-        <div className="configurator">
+        <div className="demo-room-switcher" aria-label="اختيار غرفة العرض"><div><b>اختر مساحة التجربة</b><small>شقة تجريبية متنوعة · Living / Bedroom / Balcony</small></div><div className="demo-room-buttons">{demoRooms.map(room=><button type="button" key={room.id} className={roomId===room.id?'active':''} onClick={()=>changeRoom(room.id)}>{room.name}</button>)}</div></div><div className="configurator">
           <div className="controls">
             <div className="control-block">
               <div className="control-title"><span className="step">01</span><div><h3>اختر الخامة</h3><small>FABRIC COLLECTION</small></div></div>
@@ -333,7 +357,7 @@ export default function App() {
             </div>
             <div className="save-actions"><button className="save-btn" onClick={saveDesign}>{saved ? <><Check size={17}/> تم حفظ التصميم على جهازك</> : <>احفظ اختياراتي <ArrowLeft size={17}/></>}</button><button className="restore-btn" type="button" onClick={restoreDesign} disabled={!hasSavedDesign}>استرجاع آخر تصميم محفوظ</button></div>
           </div>
-          <div className="preview-column"><RoomPreview fabric={fabric} style={style} open={open} setOpen={setOpen} /></div>
+          <div className="preview-column"><RoomPreview fabric={fabric} style={style} open={open} setOpen={setOpen} roomId={roomId} /></div>
         </div>
       </section>
 
