@@ -113,3 +113,23 @@ footer{background:#eee9df;color:#716b60}
 .upholstery-picker button.active{box-shadow:0 0 0 2px #977447}
 .model-shell .preview-caption{position:static;padding:9px 2px 0;color:#756e64;font-size:10px;line-height:1.7}
 @media(max-width:700px){.model-stage{height:60vh;min-height:390px}.model-tools{gap:10px}.upholstery-picker{margin-inline-start:0;width:100%}}
+
+
+/* Mixed-apartment event demo controls */
+.demo-room-switcher{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 20px;margin:0 0 18px;background:#f0ebe2;border:1px solid #e3d9ca;border-radius:8px}
+.demo-room-switcher>div:first-child{display:flex;flex-direction:column;gap:4px}
+.demo-room-switcher b,.directions-heading b{font-size:15px;color:#292a27}
+.demo-room-switcher small,.directions-heading small{font-size:11px;color:#81796e}
+.demo-room-buttons{display:flex;gap:8px;flex-wrap:wrap}
+.demo-room-buttons button{border:1px solid #d5c8b6;background:#fbf9f4;color:#51483d;padding:9px 16px;border-radius:4px;cursor:pointer;font:inherit;font-size:12px}
+.demo-room-buttons button.active{background:#292a27;border-color:#292a27;color:#fff}
+.design-directions{margin:0 0 20px;padding:18px;background:#fbf9f4;border:1px solid #e8e0d4;border-radius:8px}
+.directions-heading{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.direction-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.direction-card{display:flex;flex-direction:column;align-items:flex-start;text-align:right;gap:8px;min-height:148px;padding:14px;background:#f3eee5;border:1px solid #e1d7c9;border-radius:5px;cursor:pointer;color:#292a27;font:inherit}
+.direction-card>span{font-size:10px;color:#96734d}
+.direction-card>b{font-size:14px}
+.direction-card>small{font-size:11px;line-height:1.7;color:#71695e}
+.direction-card>em{font-size:11px;color:#8a6842;font-style:normal;margin-top:auto}
+.direction-card:hover{border-color:#a78359;transform:translateY(-1px)}
+@media(max-width:760px){.demo-room-switcher{align-items:flex-start;flex-direction:column;padding:14px}.demo-room-buttons{width:100%}.demo-room-buttons button{flex:1;padding:9px 8px}.direction-cards{grid-template-columns:1fr}.direction-card{min-height:0}.direction-card>em{margin-top:0}}
