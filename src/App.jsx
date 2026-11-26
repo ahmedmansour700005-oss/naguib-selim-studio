@@ -32,25 +32,33 @@ function PanoramaPreview({ panorama, roomName }) {
   useEffect(() => {
     const THREE = window.THREE; const mount = host.current
     if (!mount || !THREE || !THREE.OrbitControls || !panorama?.src) { setStatus('unavailable'); return }
-    let renderer, controls, observer, frame, texture, disposed = false
+    let renderer, controls, observer, frame, texture, disposed = false, lastPinchDistance = 0
     const scene = new THREE.Scene(); const camera = new THREE.PerspectiveCamera(72, mount.clientWidth / mount.clientHeight, 0.1, 1100); camera.position.set(0, 0, 0.1)
-    const handleWheelZoom = event => {
-      event.preventDefault()
-      camera.fov = THREE.MathUtils.clamp(camera.fov + event.deltaY * 0.035, 38, 88)
-      camera.updateProjectionMatrix()
+    const applyZoom = amount => { camera.fov = THREE.MathUtils.clamp(camera.fov + amount, 38, 88); camera.updateProjectionMatrix() }
+    const handleWheelZoom = event => { event.preventDefault(); applyZoom(event.deltaY * 0.035) }
+    const getPinchDistance = event => event.touches.length < 2 ? 0 : Math.hypot(event.touches[0].clientX-event.touches[1].clientX,event.touches[0].clientY-event.touches[1].clientY)
+    const handleTouchStart = event => { lastPinchDistance = getPinchDistance(event) }
+    const handleTouchMove = event => {
+      const nextDistance = getPinchDistance(event)
+      if(nextDistance && lastPinchDistance){event.preventDefault();applyZoom((lastPinchDistance-nextDistance)*0.08)}
+      lastPinchDistance = nextDistance
     }
+    const handleTouchEnd = () => { lastPinchDistance = 0 }
     try {
       renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); renderer.setSize(mount.clientWidth, mount.clientHeight); renderer.outputEncoding = THREE.sRGBEncoding; mount.appendChild(renderer.domElement)
       const geometry = new THREE.SphereGeometry(500, 72, 48); geometry.scale(-1, 1, 1); const material = new THREE.MeshBasicMaterial({ color: 0xffffff }); scene.add(new THREE.Mesh(geometry, material))
       controls = new THREE.OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.dampingFactor = 0.055; controls.enablePan = false; controls.enableZoom = false; controls.minDistance = 0.1; controls.maxDistance = 0.1; controls.minPolarAngle = 0.01; controls.maxPolarAngle = Math.PI - 0.01; controls.rotateSpeed = -0.28
       renderer.domElement.addEventListener('wheel', handleWheelZoom, { passive: false })
+      renderer.domElement.addEventListener('touchstart', handleTouchStart, { passive: true })
+      renderer.domElement.addEventListener('touchmove', handleTouchMove, { passive: false })
+      renderer.domElement.addEventListener('touchend', handleTouchEnd)
       const loader = new THREE.TextureLoader(); loader.setCrossOrigin('anonymous'); loader.load(panorama.src, loaded => { if (disposed) { loaded.dispose(); return }; texture = loaded; texture.encoding = THREE.sRGBEncoding; material.map = texture; material.needsUpdate = true; setStatus('ready') }, undefined, () => { if (disposed) return; setError('تعذر تحميل صورة البانوراما. تأكد من الرابط وإعدادات CORS.'); setStatus('error') })
       const resize = () => { if (!mount.clientWidth || !mount.clientHeight) return; camera.aspect = mount.clientWidth / mount.clientHeight; camera.updateProjectionMatrix(); renderer.setSize(mount.clientWidth, mount.clientHeight) }; observer = new ResizeObserver(resize); observer.observe(mount)
       const animate = () => { frame = requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera) }; animate()
     } catch { setError('المتصفح لم يتمكن من تشغيل عارض 360° على هذا الجهاز.'); setStatus('error') }
-    return () => { disposed = true; cancelAnimationFrame(frame); observer?.disconnect(); renderer?.domElement?.removeEventListener('wheel', handleWheelZoom); controls?.dispose(); texture?.dispose(); scene.traverse(object => { object.geometry?.dispose(); if (object.material) object.material.dispose() }); renderer?.dispose(); if (renderer?.domElement?.parentNode === mount) mount.removeChild(renderer.domElement) }
+    return () => { disposed = true; cancelAnimationFrame(frame); observer?.disconnect(); renderer?.domElement?.removeEventListener('wheel', handleWheelZoom); renderer?.domElement?.removeEventListener('touchstart', handleTouchStart); renderer?.domElement?.removeEventListener('touchmove', handleTouchMove); renderer?.domElement?.removeEventListener('touchend', handleTouchEnd); controls?.dispose(); texture?.dispose(); scene.traverse(object => { object.geometry?.dispose(); if (object.material) object.material.dispose() }); renderer?.dispose(); if (renderer?.domElement?.parentNode === mount) mount.removeChild(renderer.domElement) }
   }, [panorama?.src])
-  return <div className="room-shell panorama-shell"><div className="room-top"><span>{roomName} · جولة 360° مصوّرة</span><span className="live-dot">{status === 'ready' ? 'البانوراما جاهزة' : status === 'error' ? 'تعذر التحميل' : 'جارٍ تحميل الصورة'}</span></div><div className="panorama-stage" ref={host} aria-label="جولة بانوراما 360 درجة">{status !== 'ready' && <div className="panorama-message">{status === 'error' ? error : 'جارٍ تحميل صورة الغرفة الأصلية…'}</div>}<div className="model-badge">360° · اسحب للتدوير واستخدم عجلة الماوس للتقريب</div></div><p className="panorama-note">هذه جولة مصوّرة من نقطة تصوير ثابتة؛ التنقل بين الغرف أو النقاط يتطلب صور بانوراما مرتبطة، وليست حركة حرة داخل مجسم ثلاثي الأبعاد.</p></div>
+  return <div className="room-shell panorama-shell"><div className="room-top"><span>{roomName} · جولة 360° مصوّرة</span><span className="live-dot">{status === 'ready' ? 'البانوراما جاهزة' : status === 'error' ? 'تعذر التحميل' : 'جارٍ تحميل الصورة'}</span></div><div className="panorama-stage" ref={host} aria-label="جولة بانوراما 360 درجة">{status !== 'ready' && <div className="panorama-message">{status === 'error' ? error : 'جارٍ تحميل صورة الغرفة الأصلية…'}</div>}<div className="model-badge">360° · اسحب للتدوير واستخدم عجلة الماوس أو إصبعين للتقريب</div></div><p className="panorama-note">هذه جولة مصوّرة من نقطة تصوير ثابتة؛ التنقل بين الغرف أو النقاط يتطلب صور بانوراما مرتبطة، وليست حركة حرة داخل مجسم ثلاثي الأبعاد.</p></div>
 }
 function RoomPreview({ fabric, style, open, setOpen, roomId, opening, materialImage, upholsteryImage, upholstery, setUpholstery, materialScale, setMaterialScale, fabricOpacity, setFabricOpacity, matchUpholsteryToCatalog, setMatchUpholsteryToCatalog }) {
   const host = useRef(null)
