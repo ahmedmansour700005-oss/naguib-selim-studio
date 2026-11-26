@@ -351,7 +351,7 @@ export default function App() {
               <label className="wide-field">ملاحظات المعاينة<textarea rows="2" value={activeOpening.notes} onChange={e => updateOpening('notes', e.target.value)} placeholder="ميول، بروز، عوائق، طريقة التثبيت..." /></label>
               <div className="estimate"><span><Ruler size={16}/> استهلاك الخامات التقديري</span><b>{openingEstimates.every(item => item.valid) ? `${openingEstimates.reduce((sum,item)=>sum+item.fabricAreaM2,0).toFixed(2)} م²` : '—'}</b></div><p className="estimate-note">سعر البيع غير معروض حاليًا لعدم توفر قائمة أسعار معتمدة ووحدة بيع مؤكدة من الاستوديو. لن نخترع سعرًا أو نقدم مقايسة غير موثوقة.</p>
               <div className="estimate-note">
-                {openingEstimates.map(item => <p key={item.id}>{item.name}: {item.valid ? `${item.fabricAreaM2.toFixed(2)} م² خامة تقريبًا · ${item.estimateEgp.toLocaleString('en-US')} ج.م` : 'أدخل عرضًا وارتفاعًا صحيحين بالسم لإظهار التقدير.'}</p>)}
+                {openingEstimates.map(item => <p key={item.id}>{item.name}: {item.valid ? `${item.fabricAreaM2.toFixed(2)} م² خامة تقريبًا${item.pricingAvailable ? ` · ${item.estimateEgp.toLocaleString('en-US')} ج.م` : ''}` : 'أدخل عرضًا وارتفاعًا صحيحين بالسم لإظهار التقدير.'}</p>)}
               </div>
               {selectedCatalog && <p className="estimate-note">تنبيه: سعر صفحة المنتج المعروض مرجعي فقط وقد يكون مرتبطاً بمتغير أو وحدة بيع مختلفة. تقدير التكلفة الحالي ما زال تجريبياً ولا يستخدم سعر هذه الخامة كمقايسة.</p>}
               <p className="estimate-note">الحساب استرشادي ويعتمد على معامل الثنيات والزيادات وعدد الطبقات وهالك تقديري. لا يُعد مقايسة نهائية قبل المعاينة وقياس الموقع.</p>
