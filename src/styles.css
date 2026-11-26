@@ -162,3 +162,5 @@ footer{background:#eee9df;color:#716b60}
 .upholstery-match input{accent-color:#96734d;width:15px;height:15px}
 .upholstery-match:has(input:disabled){opacity:.5;cursor:not-allowed}
 @media(max-width:700px){.upholstery-match{width:100%;font-size:10px}}
+
+.texture-scale-control{display:flex;align-items:center;gap:9px;font-size:11px;color:#62594d;min-width:230px}.texture-scale-control input{width:105px;accent-color:#96734d}.texture-scale-control span{font-variant-numeric:tabular-nums;color:#8a6842;min-width:34px}@media(max-width:700px){.texture-scale-control{width:100%;min-width:0}.texture-scale-control input{flex:1}}
