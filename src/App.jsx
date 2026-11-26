@@ -317,7 +317,7 @@ export default function App() {
   const activeRoom = demoRooms.find(room => room.id === roomId) || demoRooms[0]
   const viewingModes = getRoomViewingModes(activeRoom)
   const changeRoom = id => { const room = demoRooms.find(item => item.id === id); if (!room) return; setRoomId(id); setViewMode('3d'); setOpenings(room.openings.map(item => ({...item}))); setActiveOpeningId(room.openings[0].id) }
-  const [activeOpeningId, setActiveOpeningId] = useState(1)
+  const [activeOpeningId, setActiveOpeningId] = useState(demoRooms[0].openings[0].id)
   const activeOpening = openings.find(item => item.id === activeOpeningId) || openings[0]
   const updateOpening = (field, value) => setOpenings(items => items.map(item => item.id === activeOpeningId ? { ...item, [field]: value } : item))
   const addOpening = () => {
