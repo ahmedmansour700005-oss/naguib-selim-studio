@@ -383,6 +383,7 @@ export default function App() {
       if (!isValidPanoramaAsset(asset)) {
         URL.revokeObjectURL(url)
         window.alert(`الصورة ليست بانوراما 360° بنسبة 2:1. أبعاد الصورة الحالية: ${image.naturalWidth} × ${image.naturalHeight}.`)
+        event.target.value = ''
         return
       }
       const previousUrl = panoramaOverrides[targetRoomId]?.src

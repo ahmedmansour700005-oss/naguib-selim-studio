@@ -10,7 +10,9 @@ Each room has two independent viewing modes:
 - `model3d`: a separate interactive 3D scene. It supports free orbit around its modeled geometry, but must not be described as a photographic reconstruction.
 
 A room panorama is accepted only when all of the following are supplied:
-- HTTPS or locally hosted asset path
+- HTTPS or locally hosted asset path; the configurator also accepts a temporary local file preview through the browser's object URL
+- For a local preview, upload a JPG, PNG or WebP file up to 35 MB; it must be equirectangular and have a 2:1 aspect ratio
+- Local file previews stay in the current browser session only. They are not uploaded to Cloudflare or saved permanently; production/demo assets must be hosted at stable HTTPS URLs
 - projection = `equirectangular`
 - image dimensions in a 2:1 ratio (tolerance 1.5%)
 - source/license and capture notes
