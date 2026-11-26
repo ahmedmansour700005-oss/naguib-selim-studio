@@ -25,61 +25,167 @@ function Curtain({ color, open, style }) {
   </div>
 }
 
-function RoomPreview() {
-  const viewerHost = useRef(null)
-  const viewerInstance = useRef(null)
-  const [rotating, setRotating] = useState(true)
-  const [viewerReady, setViewerReady] = useState(false)
+function RoomPreview({ fabric, style, open, setOpen }) {
+  const host = useRef(null)
+  const sceneRef = useRef(null)
+  const [ready, setReady] = useState(false)
+  const [upholstery, setUpholstery] = useState('#b9a58b')
 
   useEffect(() => {
-    if (!viewerHost.current || !window.pannellum) return
-    const viewer = window.pannellum.viewer(viewerHost.current, {
-      type: 'equirectangular',
-      panorama: 'https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/cayley_interior.jpg',
-      autoLoad: true,
-      autoRotate: -1.2,
-      compass: false,
-      showControls: true,
-      showFullscreenCtrl: true,
-      showZoomCtrl: true,
-      mouseZoom: true,
-      draggable: true,
-      hfov: 100,
-      minHfov: 45,
-      maxHfov: 120,
-      pitch: 0,
-      yaw: 0,
-      strings: { loadingLabel: 'جارٍ تحميل الغرفة…', loadButtonLabel: 'تحميل الجولة 360°' }
-    })
-    viewerInstance.current = viewer
-    viewer.on('load', () => setViewerReady(true))
-    viewer.on('error', () => setViewerReady(false))
-    return () => {
-      viewer.destroy()
-      viewerInstance.current = null
+    const THREE = window.THREE
+    if (!host.current || !THREE || !THREE.OrbitControls) return
+    const mount = host.current
+    const scene = new THREE.Scene()
+    scene.background = new THREE.Color('#d9d1c4')
+    scene.fog = new THREE.Fog('#d9d1c4', 13, 28)
+    const camera = new THREE.PerspectiveCamera(48, mount.clientWidth / mount.clientHeight, 0.1, 100)
+    camera.position.set(0, 3.1, 8.8)
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false })
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
+    renderer.setSize(mount.clientWidth, mount.clientHeight)
+    renderer.shadowMap.enabled = true
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap
+    renderer.outputEncoding = THREE.sRGBEncoding
+    renderer.toneMapping = THREE.ACESFilmicToneMapping
+    renderer.toneMappingExposure = 1.12
+    mount.appendChild(renderer.domElement)
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement)
+    controls.enableDamping = true
+    controls.dampingFactor = 0.06
+    controls.target.set(0, 1.35, 0)
+    controls.minDistance = 4.5
+    controls.maxDistance = 12
+    controls.maxPolarAngle = Math.PI * 0.49
+    controls.minPolarAngle = Math.PI * 0.18
+
+    const mat = (color, roughness=.78, metalness=0) => new THREE.MeshStandardMaterial({color,roughness,metalness})
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(18,18),mat('#b5a58e'))
+    floor.rotation.x = -Math.PI/2; floor.position.y = -0.03; floor.receiveShadow = true; scene.add(floor)
+    const backWall = new THREE.Mesh(new THREE.PlaneGeometry(12,6),mat('#e8e0d3'))
+    backWall.position.set(0,3,-3.2); backWall.receiveShadow=true; scene.add(backWall)
+    const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(6.5,6),mat('#d8cbbb'))
+    leftWall.rotation.y=Math.PI/2; leftWall.position.set(-6,3,0); scene.add(leftWall)
+    const rightWall = new THREE.Mesh(new THREE.PlaneGeometry(6.5,6),mat('#d8cbbb'))
+    rightWall.rotation.y=-Math.PI/2; rightWall.position.set(6,3,0); scene.add(rightWall)
+
+    const windowFrame = new THREE.Group()
+    const frameMat=mat('#8b745a',.42)
+    const glassMat=new THREE.MeshStandardMaterial({color:'#9bbbc0',roughness:.18,metalness:.08,transparent:true,opacity:.72,emissive:'#263c40',emissiveIntensity:.16})
+    const glass=new THREE.Mesh(new THREE.PlaneGeometry(4.15,2.65),glassMat)
+    glass.position.set(0,2.45,-3.12); windowFrame.add(glass)
+    ;[[-2.13,0.12],[2.13,0.12]].forEach(([x])=>{const v=new THREE.Mesh(new THREE.BoxGeometry(.09,2.85,.12),frameMat);v.position.set(x,2.45,-3.08);windowFrame.add(v)})
+    ;[1.02,3.88].forEach(y=>{const h=new THREE.Mesh(new THREE.BoxGeometry(4.35,.09,.12),frameMat);h.position.set(0,y,-3.08);windowFrame.add(h)})
+    const mullion=new THREE.Mesh(new THREE.BoxGeometry(.045,2.65,.1),frameMat);mullion.position.set(0,2.45,-3.04);windowFrame.add(mullion)
+    scene.add(windowFrame)
+
+    const makeFabricTexture = (hex, pattern='linen') => {
+      const canvas=document.createElement('canvas');canvas.width=256;canvas.height=256
+      const ctx=canvas.getContext('2d');ctx.fillStyle=hex;ctx.fillRect(0,0,256,256)
+      for(let n=0;n<1250;n++){
+        const x=Math.random()*256,y=Math.random()*256
+        ctx.strokeStyle=n%2?'rgba(255,255,255,.12)':'rgba(40,30,20,.10)'
+        ctx.lineWidth=pattern==='woven'?1.4:.8;ctx.beginPath()
+        if(pattern==='woven'){ctx.moveTo(x,y);ctx.lineTo(x+Math.random()*5,y+5)}else{ctx.moveTo(x,y);ctx.lineTo(x+3,y)}
+        ctx.stroke()
+      }
+      const texture=new THREE.CanvasTexture(canvas);texture.wrapS=texture.wrapT=THREE.RepeatWrapping
+      texture.repeat.set(2,2);texture.encoding=THREE.sRGBEncoding;return texture
     }
+    const curtainMat = new THREE.MeshStandardMaterial({map:makeFabricTexture('#c7b79e'),roughness:.96,side:THREE.DoubleSide})
+    const sofaMat = new THREE.MeshStandardMaterial({map:makeFabricTexture(upholstery,'woven'),roughness:.95})
+    const curtainGroup = new THREE.Group()
+    const curtainMeshes=[]
+    const createCurtainPanel = (side) => {
+      const width=1.22, height=2.95, segments=72, rows=24
+      const positions=[],uvs=[],indices=[]
+      for(let y=0;y<=rows;y++){
+        const v=y/rows
+        for(let x=0;x<=segments;x++){
+          const u=x/segments
+          const pleat=Math.cos(u*Math.PI*18)*.075
+          positions.push((u-.5)*width+pleat, (v-.5)*height, Math.sin(u*Math.PI*18)*.045)
+          uvs.push(u*2,v*2)
+        }
+      }
+      for(let y=0;y<rows;y++)for(let x=0;x<segments;x++){
+        const a=y*(segments+1)+x,b=a+segments+1
+        indices.push(a,b,a+1,b,b+1,a+1)
+      }
+      const geo=new THREE.BufferGeometry()
+      geo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3))
+      geo.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));geo.setIndex(indices);geo.computeVertexNormals()
+      const mesh=new THREE.Mesh(geo,curtainMat);mesh.castShadow=true;mesh.receiveShadow=true
+      mesh.position.set(side*1.35,2.42,-2.94);mesh.userData.closedX=side*1.35;mesh.userData.openX=side*2.25
+      curtainGroup.add(mesh);curtainMeshes.push(mesh)
+    }
+    createCurtainPanel(-1);createCurtainPanel(1);scene.add(curtainGroup)
+
+    const sofa = new THREE.Group()
+    const addSofaBox=(w,h,d,x,y,z,material,round=false)=>{
+      const geometry=round?new THREE.BoxGeometry(w,h,d,4,2,4):new THREE.BoxGeometry(w,h,d)
+      const mesh=new THREE.Mesh(geometry,material);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;sofa.add(mesh);return mesh
+    }
+    addSofaBox(3.55,.42,1.12,0,.58,.35,sofaMat)
+    addSofaBox(3.5,1.05,.34,0,1.18,-.16,sofaMat)
+    addSofaBox(.42,.88,1.05,-1.78,.86,.38,sofaMat)
+    addSofaBox(.42,.88,1.05,1.78,.86,.38,sofaMat)
+    const cushionMat=new THREE.MeshStandardMaterial({map:makeFabricTexture('#d7c9b4','woven'),roughness:1})
+    for(let x=-1.15;x<=1.16;x+=1.15){
+      const cushion=new THREE.Mesh(new THREE.BoxGeometry(1.02,.22,.72),cushionMat)
+      cushion.position.set(x,.9,.28);cushion.rotation.x=-.08;cushion.castShadow=true;sofa.add(cushion)
+      const back=new THREE.Mesh(new THREE.BoxGeometry(1.02,.72,.24),cushionMat)
+      back.position.set(x,1.48,-.03);back.castShadow=true;sofa.add(back)
+    }
+    sofa.position.z=1.25;scene.add(sofa)
+
+    const coffeeTable=new THREE.Mesh(new THREE.CylinderGeometry(.9,.9,.12,64),mat('#4b4036',.22,.55))
+    coffeeTable.position.set(0,.42,2.95);coffeeTable.castShadow=true;scene.add(coffeeTable)
+    const tableBase=new THREE.Mesh(new THREE.CylinderGeometry(.48,.55,.38,32),mat('#92744e',.28,.65))
+    tableBase.position.set(0,.22,2.95);scene.add(tableBase)
+    const rug=new THREE.Mesh(new THREE.BoxGeometry(6,.045,4.2),mat('#d8ccba'))
+    rug.position.set(0,.02,1.55);rug.receiveShadow=true;scene.add(rug)
+    const plant=new THREE.Group()
+    const pot=new THREE.Mesh(new THREE.CylinderGeometry(.25,.19,.48,24),mat('#ad8c68'));pot.position.y=.25;plant.add(pot)
+    for(let n=0;n<9;n++){const leaf=new THREE.Mesh(new THREE.SphereGeometry(.12,10,8),mat('#4d6553'));leaf.scale.set(1.1,3.2,.55);leaf.position.set(Math.sin(n*2.1)*.28,1+n*.07,Math.cos(n*2.1)*.22);leaf.rotation.z=(n-4)*.16;plant.add(leaf)}
+    plant.position.set(-3.25,0,-.7);scene.add(plant)
+
+    const ambient=new THREE.HemisphereLight('#fff4df','#77634d',2.0);scene.add(ambient)
+    const sun=new THREE.DirectionalLight('#fff0d8',3.0);sun.position.set(-3,7,5);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);scene.add(sun)
+    const fillLight=new THREE.PointLight('#d5e7ef',18,12);fillLight.position.set(0,3,-2.2);scene.add(fillLight)
+
+    const resize=()=>{if(!mount.clientWidth||!mount.clientHeight)return;camera.aspect=mount.clientWidth/mount.clientHeight;camera.updateProjectionMatrix();renderer.setSize(mount.clientWidth,mount.clientHeight)}
+    const observer=new ResizeObserver(resize);observer.observe(mount)
+    let frame=0
+    const animate=()=>{frame=requestAnimationFrame(animate);controls.update();renderer.render(scene,camera)}
+    animate()
+    sceneRef.current={scene,renderer,camera,controls,curtainMeshes,curtainMat,sofaMat,makeFabricTexture}
+    setReady(true)
+    return ()=>{cancelAnimationFrame(frame);observer.disconnect();controls.dispose();renderer.dispose();scene.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>m.dispose())}});if(renderer.domElement.parentNode===mount)mount.removeChild(renderer.domElement);sceneRef.current=null;setReady(false)}
   }, [])
 
-  const toggleRotation = () => {
-    const viewer = viewerInstance.current
-    if (!viewer) return
-    if (rotating) viewer.stopAutoRotate()
-    else viewer.startAutoRotate(-1.2)
-    setRotating(!rotating)
-  }
+  useEffect(()=>{
+    const state=sceneRef.current;if(!state)return
+    const color=fabric?.color||'#c7b79e'
+    const nextTexture=state.makeFabricTexture(color, fabric?.texture||'linen')
+    state.curtainMat.map?.dispose();state.curtainMat.map=nextTexture;state.curtainMat.needsUpdate=true
+    const sofaTexture=state.makeFabricTexture(upholstery,'woven')
+    state.sofaMat.map?.dispose();state.sofaMat.map=sofaTexture;state.sofaMat.needsUpdate=true
+    state.curtainMeshes.forEach(mesh=>{mesh.position.x=open?mesh.userData.openX:mesh.userData.closedX})
+  },[fabric,upholstery,open,style,ready])
 
-  return <div className="room-shell panorama-shell">
-    <div className="room-top"><span>جولة الغرفة 360°</span><span className="live-dot">{viewerReady ? 'بانوراما جاهزة للدوران' : 'تحميل البانوراما'}</span></div>
-    <div className="room-scene panorama-scene">
-      <div ref={viewerHost} className="panorama-viewer" aria-label="جولة بانورامية 360 درجة للغرفة" />
-      {!viewerReady && <div className="panorama-loading">جارٍ تحميل صورة الغرفة البانورامية…</div>}
-      <div className="panorama-hint">اسحب بالماوس أو بإصبعك للدوران · استخدم عجلة الماوس أو القرص للتقريب</div>
+  return <div className="room-shell model-shell">
+    <div className="room-top"><span>استوديو ثلاثي الأبعاد تفاعلي</span><span className="live-dot">{ready?'المشهد ثلاثي الأبعاد جاهز':'جارٍ تجهيز المشهد'}</span></div>
+    <div className="model-stage" ref={host} aria-label="غرفة ثلاثية الأبعاد قابلة للدوران وتخصيص الأقمشة">
+      {!ready&&<div className="model-loading">جارٍ تحميل الاستوديو ثلاثي الأبعاد…</div>}
+      <div className="model-badge">3D · تحريك وتدوير بالماوس أو اللمس</div>
     </div>
-    <div className="panorama-actions">
-      <button type="button" className="preview-toggle" onClick={toggleRotation}>{rotating ? 'إيقاف الدوران التلقائي' : 'تشغيل الدوران التلقائي'}</button>
-      <a href="https://polyhaven.com/a/cayley_interior" target="_blank" rel="noreferrer">مصدر البانوراما · Poly Haven (CC0)</a>
+    <div className="model-tools">
+      <button type="button" className="preview-toggle" onClick={()=>setOpen(!open)}>{open?'إغلاق الستائر':'فتح الستائر'}</button>
+      <span>خامة الستارة: {fabric?.name||'كتان طبيعي'}</span>
+      <div className="upholstery-picker"><span>تنجيد الكنبة</span>{['#b9a58b','#777f87','#53685a','#3d4654','#9a755b'].map(color=><button key={color} type="button" aria-label={'لون التنجيد '+color} className={upholstery===color?'active':''} style={{background:color}} onClick={()=>setUpholstery(color)}/>)}</div>
     </div>
-    <div className="preview-caption">بانوراما فوتوغرافية 360° من نقطة تصوير واحدة؛ ليست جولة 3D بحركة حرة.</div>
+    <div className="preview-caption">مشهد 3D مولّد هندسيًا داخل المتصفح؛ يمكن تدويره بحرية وتغيير خامة الستارة والتنجيد، وليس تصويرًا فوتوغرافيًا أو بانوراما 360°.</div>
   </div>
 }
 
@@ -227,7 +333,7 @@ export default function App() {
             </div>
             <div className="save-actions"><button className="save-btn" onClick={saveDesign}>{saved ? <><Check size={17}/> تم حفظ التصميم على جهازك</> : <>احفظ اختياراتي <ArrowLeft size={17}/></>}</button><button className="restore-btn" type="button" onClick={restoreDesign} disabled={!hasSavedDesign}>استرجاع آخر تصميم محفوظ</button></div>
           </div>
-          <div className="preview-column"><RoomPreview /></div>
+          <div className="preview-column"><RoomPreview fabric={fabric} style={style} open={open} setOpen={setOpen} /></div>
         </div>
       </section>
 
