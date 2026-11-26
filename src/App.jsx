@@ -6,12 +6,12 @@ import { getRoomViewingModes } from './sceneAssets.js'
 import { ArrowDown, ArrowLeft, Check, ChevronDown, Eye, Menu, Ruler, Sparkles, X } from 'lucide-react'
 
 const fabrics = [
-  { id: 'linen', name: 'كتان طبيعي', en: 'Natural Linen', color: '#c9bda8', price: 680, texture: 'linen' },
-  { id: 'ivory', name: 'أوف وايت', en: 'Soft Ivory', color: '#e8e1d3', price: 620, texture: 'plain' },
-  { id: 'sage', name: 'أخضر سيج', en: 'Sage Green', color: '#9ba58f', price: 740, texture: 'woven' },
-  { id: 'taupe', name: 'تاوب دافئ', en: 'Warm Taupe', color: '#9b8877', price: 720, texture: 'linen' },
-  { id: 'blue', name: 'أزرق ضبابي', en: 'Misty Blue', color: '#9baeb4', price: 760, texture: 'woven' },
-  { id: 'charcoal', name: 'رمادي فحمي', en: 'Charcoal', color: '#555957', price: 790, texture: 'plain' },
+  { id: 'linen', name: 'كتان طبيعي', en: 'Natural Linen', color: '#c9bda8', price: null, texture: 'linen' },
+  { id: 'ivory', name: 'أوف وايت', en: 'Soft Ivory', color: '#e8e1d3', price: null, texture: 'plain' },
+  { id: 'sage', name: 'أخضر سيج', en: 'Sage Green', color: '#9ba58f', price: null, texture: 'woven' },
+  { id: 'taupe', name: 'تاوب دافئ', en: 'Warm Taupe', color: '#9b8877', price: null, texture: 'linen' },
+  { id: 'blue', name: 'أزرق ضبابي', en: 'Misty Blue', color: '#9baeb4', price: null, texture: 'woven' },
+  { id: 'charcoal', name: 'رمادي فحمي', en: 'Charcoal', color: '#555957', price: null, texture: 'plain' },
 ]
 
 const styles = [
@@ -243,9 +243,9 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false)
   const fabric = fabrics.find(f => f.id === fabricId)
   const openingEstimates = useMemo(() => openings.map(item => ({ ...item, ...calculateFabricRequirement(item, fabric.price) })), [openings, fabric, selectedCatalog])
-  const estimate = openingEstimates.reduce((sum, item) => sum + item.estimateEgp, 0)
+  const estimate = openingEstimates.every(item => item.pricingAvailable) ? openingEstimates.reduce((sum, item) => sum + item.estimateEgp, 0) : null
   const saveDesign = () => {
-    const design = { roomId, roomName: activeRoom.name, fabricId, fabric: fabric.name, catalogFabricId: selectedCatalogId || null, catalogFabric: selectedCatalog?.name || null, catalogSource: selectedCatalog?.sourceUrl || null, styleId: style, style: styles.find(s => s.id === style).name, openings, openingEstimates, estimate, savedAt: new Date().toISOString() }
+    const design = { roomId, roomName: activeRoom.name, fabricId, fabric: fabric.name, catalogFabricId: selectedCatalogId || null, catalogFabric: selectedCatalog?.name || null, catalogSource: selectedCatalog?.sourceUrl || null, styleId: style, style: styles.find(s => s.id === style).name, openings, openingEstimates, estimate, pricingStatus: 'awaiting-approved-price-list', savedAt: new Date().toISOString() }
     localStorage.setItem('nss-design', JSON.stringify(design))
     setSaved(true)
     setTimeout(() => setSaved(false), 3500)
@@ -349,7 +349,7 @@ export default function App() {
               <label className="pelmet-toggle"><input type="checkbox" checked={activeOpening.hasPelmet} onChange={e => updateOpening('hasPelmet', e.target.checked)} /> يوجد بيت ستارة / صندوق مخفي</label>
               {activeOpening.hasPelmet && <label className="wide-field">عمق بيت الستارة (سم)<input type="number" min="1" max="200" step="0.5" value={activeOpening.pelmetDepthCm} onChange={e => updateOpening('pelmetDepthCm', e.target.value)} /></label>}
               <label className="wide-field">ملاحظات المعاينة<textarea rows="2" value={activeOpening.notes} onChange={e => updateOpening('notes', e.target.value)} placeholder="ميول، بروز، عوائق، طريقة التثبيت..." /></label>
-              <div className="estimate"><span><Ruler size={16}/> إجمالي تقدير الخامات</span><b>{estimate.toLocaleString('en-US')} <small>ج.م</small></b></div>
+              <div className="estimate"><span><Ruler size={16}/> استهلاك الخامات التقديري</span><b>{openingEstimates.every(item => item.valid) ? `${openingEstimates.reduce((sum,item)=>sum+item.fabricAreaM2,0).toFixed(2)} م²` : '—'}</b></div><p className="estimate-note">سعر البيع غير معروض حاليًا لعدم توفر قائمة أسعار معتمدة ووحدة بيع مؤكدة من الاستوديو. لن نخترع سعرًا أو نقدم مقايسة غير موثوقة.</p>
               <div className="estimate-note">
                 {openingEstimates.map(item => <p key={item.id}>{item.name}: {item.valid ? `${item.fabricAreaM2.toFixed(2)} م² خامة تقريبًا · ${item.estimateEgp.toLocaleString('en-US')} ج.م` : 'أدخل عرضًا وارتفاعًا صحيحين بالسم لإظهار التقدير.'}</p>)}
               </div>
