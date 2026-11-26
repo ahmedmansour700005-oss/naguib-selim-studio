@@ -83,3 +83,18 @@ footer{background:#eee9df;color:#716b60}
  .controls{border:1px solid #e9e4da}
  .room-shell{background:#e8e1d4}
 }
+
+
+/* Real equirectangular panorama viewer */
+.panorama-shell{background:#eee8dd;padding:16px;min-height:0}
+.panorama-scene{height:clamp(420px,58vw,660px);min-height:420px;background:#211d18;position:relative;overflow:hidden}
+.panorama-viewer{position:absolute;inset:0;width:100%;height:100%}
+.panorama-viewer .pnlm-container{background:#211d18}
+.panorama-viewer .pnlm-load-button{background:#8e6a42}
+.panorama-loading{position:absolute;inset:0;display:grid;place-items:center;background:#211d18aa;color:#fff;font-size:14px;pointer-events:none}
+.panorama-hint{position:absolute;bottom:16px;right:16px;z-index:3;background:#171512c9;color:#fff;padding:9px 13px;border-radius:30px;font-size:11px;pointer-events:none}
+.panorama-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 2px 4px}
+.panorama-actions .preview-toggle{position:static;border-radius:3px;margin:0}
+.panorama-actions a{font-size:11px;color:#8b6a43;text-decoration:underline}
+.panorama-shell .preview-caption{position:static;padding:8px 2px 0;color:#756e64;font-size:10px}
+@media(max-width:700px){.panorama-scene{height:62vh;min-height:380px}.panorama-hint{font-size:9px;right:8px;bottom:8px}.panorama-actions{align-items:flex-start;flex-direction:column}.panorama-actions .preview-toggle{width:auto}}
