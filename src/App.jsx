@@ -212,12 +212,32 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, materialImage, upho
 
     const resize=()=>{if(!mount.clientWidth||!mount.clientHeight)return;camera.aspect=mount.clientWidth/mount.clientHeight;camera.updateProjectionMatrix();renderer.setSize(mount.clientWidth,mount.clientHeight)}
     const observer=new ResizeObserver(resize);observer.observe(mount)
+    mount.tabIndex=0;mount.setAttribute('aria-label','مشهد ثلاثي الأبعاد؛ انقر هنا ثم استخدم W A S D للتحرك')
+    const walkForward=new THREE.Vector3(),walkRight=new THREE.Vector3(),worldUp=new THREE.Vector3(0,1,0)
+    const walk=(event)=>{
+      if(!['KeyW','KeyA','KeyS','KeyD'].includes(event.code))return
+      if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return
+      event.preventDefault()
+      camera.getWorldDirection(walkForward);walkForward.y=0;walkForward.normalize()
+      walkRight.crossVectors(walkForward,worldUp).normalize()
+      const step=.32;const delta=new THREE.Vector3()
+      if(event.code==='KeyW')delta.addScaledVector(walkForward,step)
+      if(event.code==='KeyS')delta.addScaledVector(walkForward,-step)
+      if(event.code==='KeyA')delta.addScaledVector(walkRight,-step)
+      if(event.code==='KeyD')delta.addScaledVector(walkRight,step)
+      camera.position.x=THREE.MathUtils.clamp(camera.position.x+delta.x,-5.2,5.2)
+      camera.position.z=THREE.MathUtils.clamp(camera.position.z+delta.z,-1.5,7.5)
+      controls.target.x=THREE.MathUtils.clamp(controls.target.x+delta.x,-5.2,5.2)
+      controls.target.z=THREE.MathUtils.clamp(controls.target.z+delta.z,-1.5,7.5)
+    }
+    const focusScene=()=>mount.focus()
+    mount.addEventListener('keydown',walk);mount.addEventListener('pointerdown',focusScene)
     let frame=0
     const animate=()=>{frame=requestAnimationFrame(animate);curtainMeshes.forEach(mesh=>{if(Number.isFinite(mesh.userData.targetX))mesh.position.x+=(mesh.userData.targetX-mesh.position.x)*.12});controls.update();renderer.render(scene,camera)}
     animate()
     sceneRef.current={THREE,scene,renderer,camera,controls,curtainMeshes,curtainMat,sofaMat,makeFabricTexture}
     setReady(true)
-    return ()=>{cancelAnimationFrame(frame);observer.disconnect();controls.dispose();renderer.dispose();scene.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>m.dispose())}});if(renderer.domElement.parentNode===mount)mount.removeChild(renderer.domElement);sceneRef.current=null;setReady(false)}
+    return ()=>{cancelAnimationFrame(frame);observer.disconnect();mount.removeEventListener('keydown',walk);mount.removeEventListener('pointerdown',focusScene);controls.dispose();renderer.dispose();scene.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>m.dispose())}});if(renderer.domElement.parentNode===mount)mount.removeChild(renderer.domElement);sceneRef.current=null;setReady(false)}
   }, [roomId])
 
   useEffect(()=>{
@@ -254,7 +274,7 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, materialImage, upho
     <div className="room-top"><span>{demoRooms.find(room=>room.id===roomId)?.name || 'استوديو ثلاثي الأبعاد'}</span><span className="live-dot">{ready?'3D تفاعلي جاهز · 360° يتطلب صور الغرف':'جارٍ تجهيز المشهد'}</span></div>
     <div className="model-stage" ref={host} aria-label="غرفة ثلاثية الأبعاد قابلة للدوران وتخصيص الأقمشة">
       {!ready&&<div className="model-loading">جارٍ تحميل الاستوديو ثلاثي الأبعاد…</div>}
-      <div className="model-badge">3D · تحريك وتدوير بالماوس أو اللمس</div>
+      <div className="model-badge">3D · تدوير بالماوس · حركة W A S D</div>
     </div>
     <div className="model-tools">
       <button type="button" className="preview-toggle" onClick={()=>setOpen(!open)}>{open?'إغلاق الستائر':'فتح الستائر'}</button>
@@ -264,7 +284,7 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, materialImage, upho
       <label className="texture-scale-control">مقياس نقشة القماش <input type="range" min="1" max="6" step="0.25" value={materialScale} onChange={event=>setMaterialScale(Number(event.target.value))}/><span>{materialScale.toFixed(2)}×</span></label>
       <label className="texture-scale-control">شفافية الستارة <input type="range" min="0.35" max="1" step="0.05" value={fabricOpacity} onChange={event=>setFabricOpacity(Number(event.target.value))}/><span>{Math.round(fabricOpacity*100)}%</span></label>
     </div>
-    <div className="preview-caption">مشهد 3D تجريبي مولّد داخل المتصفح؛ يمكن تدويره بحرية. {materialImage ? 'تم تطبيق صورة الخامة المختارة كنسيج بصري إرشادي على الستارة، وليست خريطة PBR معايرة أو محاكاة دقيقة لاتجاه النسيج والإضاءة.' : 'يُستخدم نسيج إجرائي مؤقت حتى اختيار خامة لها صورة موثقة.'} ليس تصويرًا فوتوغرافيًا أو جولة 360° ملتقطة.</div>
+    <div className="preview-caption">مشهد 3D تجريبي مولّد داخل المتصفح؛ يمكن تدويره، وبعد النقر عليه التحرك داخل حدود الغرفة بمفاتيح W A S D. {materialImage ? 'تم تطبيق صورة الخامة المختارة كنسيج بصري إرشادي على الستارة، وليست خريطة PBR معايرة أو محاكاة دقيقة لاتجاه النسيج والإضاءة.' : 'يُستخدم نسيج إجرائي مؤقت حتى اختيار خامة لها صورة موثقة.'} ليس تصويرًا فوتوغرافيًا أو جولة 360° ملتقطة.</div>
   </div>
 }
 
