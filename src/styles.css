@@ -155,3 +155,10 @@ footer{background:#eee9df;color:#716b60}
 .panorama-stage .model-badge{z-index:2}
 .panorama-note{font-size:10px;line-height:1.9;color:#77786e;margin:10px 3px 0}
 @media(max-width:650px){.panorama-shell{min-height:420px}.panorama-stage{height:350px;min-height:300px}.panorama-note{font-size:9px}}
+
+
+/* Catalog fabric can be shared with the upholstery preview */
+.upholstery-match{display:flex;align-items:center;gap:7px;font-size:11px;color:#62594d;cursor:pointer}
+.upholstery-match input{accent-color:#96734d;width:15px;height:15px}
+.upholstery-match:has(input:disabled){opacity:.5;cursor:not-allowed}
+@media(max-width:700px){.upholstery-match{width:100%;font-size:10px}}
