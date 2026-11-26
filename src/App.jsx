@@ -46,7 +46,7 @@ function PanoramaPreview({ panorama, roomName }) {
   }, [panorama?.src])
   return <div className="room-shell panorama-shell"><div className="room-top"><span>{roomName} · جولة 360° مصوّرة</span><span className="live-dot">{status === 'ready' ? 'البانوراما جاهزة' : status === 'error' ? 'تعذر التحميل' : 'جارٍ تحميل الصورة'}</span></div><div className="panorama-stage" ref={host} aria-label="جولة بانوراما 360 درجة">{status !== 'ready' && <div className="panorama-message">{status === 'error' ? error : 'جارٍ تحميل صورة الغرفة الأصلية…'}</div>}<div className="model-badge">360° · اسحب للتدوير واستخدم عجلة الماوس للتقريب</div></div><p className="panorama-note">هذه جولة مصوّرة من نقطة تصوير ثابتة؛ التنقل بين الغرف أو النقاط يتطلب صور بانوراما مرتبطة، وليست حركة حرة داخل مجسم ثلاثي الأبعاد.</p></div>
 }
-function RoomPreview({ fabric, style, open, setOpen, roomId, materialImage }) {
+function RoomPreview({ fabric, style, open, setOpen, roomId, materialImage, upholsteryImage, matchUpholsteryToCatalog, setMatchUpholsteryToCatalog }) {
   const host = useRef(null)
   const sceneRef = useRef(null)
   const [ready, setReady] = useState(false)
@@ -227,8 +227,8 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, materialImage }) {
     const fallbackTexture=state.makeFabricTexture(color, fabric?.texture||'linen')
     state.curtainMat.map?.dispose();state.curtainMat.map=fallbackTexture;state.curtainMat.needsUpdate=true
     let active=true
+    const loader=new state.THREE.TextureLoader();loader.setCrossOrigin('anonymous')
     if(materialImage){
-      const loader=new state.THREE.TextureLoader();loader.setCrossOrigin('anonymous')
       loader.load(materialImage,texture=>{
         if(!active){texture.dispose();return}
         texture.wrapS=state.THREE.RepeatWrapping;texture.wrapT=state.THREE.RepeatWrapping
@@ -238,9 +238,17 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, materialImage }) {
     }
     const sofaTexture=state.makeFabricTexture(upholstery,'woven')
     state.sofaMat.map?.dispose();state.sofaMat.map=sofaTexture;state.sofaMat.needsUpdate=true
+    if(upholsteryImage){
+      loader.load(upholsteryImage,texture=>{
+        if(!active){texture.dispose();return}
+        texture.wrapS=state.THREE.RepeatWrapping;texture.wrapT=state.THREE.RepeatWrapping
+        texture.repeat.set(2,2);texture.encoding=state.THREE.sRGBEncoding
+        state.sofaMat.map?.dispose();state.sofaMat.map=texture;state.sofaMat.needsUpdate=true
+      },undefined,()=>{})
+    }
     state.curtainMeshes.forEach(mesh=>{mesh.userData.targetX=open?mesh.userData.openX:mesh.userData.closedX;mesh.userData.applyStyle?.(style)})
     return ()=>{active=false}
-  },[fabric,upholstery,open,style,ready,materialImage])
+  },[fabric,upholstery,open,style,ready,materialImage,upholsteryImage])
 
   return <div className="room-shell model-shell">
     <div className="room-top"><span>{demoRooms.find(room=>room.id===roomId)?.name || 'استوديو ثلاثي الأبعاد'}</span><span className="live-dot">{ready?'3D تفاعلي جاهز · 360° يتطلب صور الغرف':'جارٍ تجهيز المشهد'}</span></div>
@@ -252,6 +260,7 @@ function RoomPreview({ fabric, style, open, setOpen, roomId, materialImage }) {
       <button type="button" className="preview-toggle" onClick={()=>setOpen(!open)}>{open?'إغلاق الستائر':'فتح الستائر'}</button>
       <span>خامة الستارة: {fabric?.name||'كتان طبيعي'}</span>
       <div className="upholstery-picker"><span>تنجيد الأثاث</span>{['#b9a58b','#777f87','#53685a','#3d4654','#9a755b'].map(color=><button key={color} type="button" aria-label={'لون التنجيد '+color} className={upholstery===color?'active':''} style={{background:color}} onClick={()=>setUpholstery(color)}/>)}</div>
+      <label className="upholstery-match"><input type="checkbox" checked={matchUpholsteryToCatalog} onChange={event=>setMatchUpholsteryToCatalog(event.target.checked)} disabled={!materialImage}/> استخدم صورة خامة الكتالوج للتنجيد أيضًا</label>
     </div>
     <div className="preview-caption">مشهد 3D تجريبي مولّد داخل المتصفح؛ يمكن تدويره بحرية. {materialImage ? 'تم تطبيق صورة الخامة المختارة كنسيج بصري إرشادي على الستارة، وليست خريطة PBR معايرة أو محاكاة دقيقة لاتجاه النسيج والإضاءة.' : 'يُستخدم نسيج إجرائي مؤقت حتى اختيار خامة لها صورة موثقة.'} ليس تصويرًا فوتوغرافيًا أو جولة 360° ملتقطة.</div>
   </div>
@@ -263,6 +272,7 @@ export default function App() {
   const [fabricId, setFabricId] = useState('linen')
   const [catalogQuery, setCatalogQuery] = useState('')
   const [selectedCatalogId, setSelectedCatalogId] = useState('')
+  const [matchUpholsteryToCatalog, setMatchUpholsteryToCatalog] = useState(false)
   const selectedCatalog = fabricCatalog.find(item => item.id === selectedCatalogId)
   const filteredCatalog = fabricCatalog.filter(item => item.name.toLocaleLowerCase().includes(catalogQuery.trim().toLocaleLowerCase())).slice(0, 80)
   const [style, setStyle] = useState('wave')
@@ -407,7 +417,7 @@ export default function App() {
             </div>
             <div className="save-actions"><button className="save-btn" onClick={saveDesign}>{saved ? <><Check size={17}/> تم حفظ التصميم على جهازك</> : <>احفظ اختياراتي <ArrowLeft size={17}/></>}</button><button className="restore-btn" type="button" onClick={restoreDesign} disabled={!hasSavedDesign}>استرجاع آخر تصميم محفوظ</button></div>
           </div>
-          <div className="preview-column">{viewMode === "360" && viewingModes.panorama.available ? <PanoramaPreview panorama={activeRoom.panorama} roomName={activeRoom.name} /> : <RoomPreview fabric={fabric} style={style} open={open} setOpen={setOpen} roomId={roomId} materialImage={selectedCatalog?.imageUrl || null} />}</div>
+          <div className="preview-column">{viewMode === "360" && viewingModes.panorama.available ? <PanoramaPreview panorama={activeRoom.panorama} roomName={activeRoom.name} /> : <RoomPreview fabric={fabric} style={style} open={open} setOpen={setOpen} roomId={roomId} materialImage={selectedCatalog?.imageUrl || null} upholsteryImage={matchUpholsteryToCatalog ? selectedCatalog?.imageUrl || null : null} matchUpholsteryToCatalog={matchUpholsteryToCatalog} setMatchUpholsteryToCatalog={setMatchUpholsteryToCatalog} />}</div>
         </div>
       </section>
 
